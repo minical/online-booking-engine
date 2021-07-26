@@ -35,24 +35,24 @@ var HotelDatepicker = function HotelDatepicker(input, options) {
 	this.showTopbar = opts.showTopbar === undefined ? true : opts.showTopbar;
 	this.moveBothMonths = opts.moveBothMonths || false;
 	this.i18n = opts.i18n || {
-		selected: 'Your stay:',
-		night: 'Night',
-		nights: 'Nights',
-		button: 'Close',
-		'checkin-disabled': 'Check-in disabled',
-		'checkout-disabled': 'Check-out disabled',
-		'day-names-short': ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-		'day-names': ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-		'month-names-short': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-		'month-names': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-		'error-more': 'Date range should not be more than 1 night',
-		'error-more-plural': 'Date range should not be more than %d nights',
-		'error-less': 'Date range should not be less than 1 night',
-		'error-less-plural': 'Date range should not be less than %d nights',
-		'info-more': 'Please select a date range of at least 1 night',
-		'info-more-plural': 'Please select a date range of at least %d nights',
-		'info-range': 'Please select a date range between %d and %d nights',
-		'info-default': 'Please select a date range'
+		selected: l('online_booking_engine/Your stay')+':',
+		night: l('online_booking_engine/Night'),
+		nights: l('online_booking_engine/Nights'),
+		button: l('online_booking_engine/Close'),
+		'checkin-disabled': l('online_booking_engine/Check-in disabled'),
+		'checkout-disabled': l('online_booking_engine/Check-out disabled'),
+		'day-names-short': [l('online_booking_engine/Sun'), l('online_booking_engine/Mon'), l('online_booking_engine/Tue'), l('online_booking_engine/Wed'), l('online_booking_engine/Thu'), l('online_booking_engine/Fri'), l('online_booking_engine/Sat')],
+		'day-names': [l('online_booking_engine/Sunday'), l('online_booking_engine/Monday'), l('online_booking_engine/Tuesday'), l('online_booking_engine/Wednesday'), l('online_booking_engine/Thursday'), l('online_booking_engine/Friday'), l('online_booking_engine/Saturday')],
+		'month-names-short': [l('online_booking_engine/Jan'), l('online_booking_engine/Feb'), l('online_booking_engine/Mar'), l('online_booking_engine/Apr'), l('online_booking_engine/May'), l('online_booking_engine/Jun'), l('online_booking_engine/Jul'), l('online_booking_engine/Aug'), l('online_booking_engine/Sep'), l('online_booking_engine/Oct'), l('online_booking_engine/Nov'), l('online_booking_engine/Dec')],
+		'month-names': [l('online_booking_engine/January'), l('online_booking_engine/February'), l('online_booking_engine/March'), l('online_booking_engine/April'), l('online_booking_engine/May'), l('online_booking_engine/June'), l('online_booking_engine/July'), l('online_booking_engine/August'), l('online_booking_engine/September'), l('online_booking_engine/October'), l('online_booking_engine/November'), l('online_booking_engine/December')],
+		'error-more': l('online_booking_engine/Date range should not be more than 1 night'),
+		'error-more-plural': l('online_booking_engine/Date range should not be more than 1 night'),
+		'error-less': l('online_booking_engine/Date range should not be less than 1 night'),
+		'error-less-plural': l('online_booking_engine/Date range should not be less than %d nights'),
+		'info-more': l('online_booking_engine/Please select a date range of at least 1 night'),
+		'info-more-plural': l('online_booking_engine/Please select a date range of at least %d nights'),
+		'info-range': l('online_booking_engine/Please select a date range between %d and %d nights'),
+		'info-default': l('online_booking_engine/Please select a date range')
 	};
 	this.getValue = opts.getValue || function () {
 		return input.value;
