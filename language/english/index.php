@@ -52,4 +52,24 @@ $lang['online-booking-engine']['Please select a date range of at least %d nights
 $lang['online-booking-engine']['Please select a date range between %d and %d nights'] = 'Please select a date range between %d and %d nights';
 $lang['online-booking-engine']['Please select a date range'] = 'Please select a date range';
 
+$lang['online-booking-engine']['online_booking_engine_widget_code'] = 'online booking engine widget code';
+$lang['online-booking-engine']['online_reservation_work_properly'] = 'online_reservation_work_properly';
+$lang['online-booking-engine']['Create'] = 'Create';
+$lang['online-booking-engine']['Rate Plans'] = 'Rate Plans';
+$lang['online-booking-engine']['Update your property information in'] = 'Update your property information in';
+$lang['online-booking-engine']['Property Settings'] = 'Property Settings';
+$lang['online-booking-engine']['Set the appropriate rooms in'] = 'Set the appropriate rooms in';
+$lang['online-booking-engine']['Room Settings'] = 'Room Settings';
+$lang['online-booking-engine']['Online booking engine link'] = 'Online booking engine link';
+$lang['online-booking-engine']['Online booking engine fields'] = 'Online booking engine fields';
+$lang['online-booking-engine']['Show on booking form'] = 'Show on booking form';
+$lang['online-booking-engine']['Is a required field'] = 'Is a required field';
+$lang['online-booking-engine']['No booking field have been found.'] = 'No booking field have been found.';
+$lang['online-booking-engine']['save_all'] = 'Save All';
+$lang['online-booking-engine']['If this feature is disabled, online reservations check-in date must be tomorrow or later'] = 'If this feature is disabled, online reservations check-in date must be tomorrow or later';
+$lang['online-booking-engine']['Enabled'] = 'Enabled';
+$lang['online-booking-engine']['Disabled'] = 'Disabled';
+
+
+
 ?>

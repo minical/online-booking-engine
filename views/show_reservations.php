@@ -121,14 +121,14 @@
 
 								?>
 											
-												<a href="https://inngrid.s3.amazonaws.com/<?php echo $company_data['company_id']."/".$image['filename']; ?>"
+												<a href='<?php echo $this->image_url.$company_data["company_id"]."/".$image["filename"];'' ?>'
 												class=" <?php 
 															if ($image_index === 0) 
 																echo "col-md-12"; 
 															else 
 																echo "col-md-4 hidden-xs"; 
 														?> thumbnail"  data-lightbox="<?php echo $rate_plan_id; ?>" >
-													<img src="https://inngrid.s3.amazonaws.com/<?php echo $company_data['company_id']."/".$image['filename']; ?>" />
+													<img src='<?php echo $this->image_url.$company_data["company_id"]."/".$image["filename"]; ?>'/>
 												</a>
 										
 								<?php
