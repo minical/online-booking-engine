@@ -241,17 +241,16 @@ innGrid.customRange = function (input) {
 //Function getBaseURL
 //returns baseURL
 var getBaseURL = function () {
-    var LOCALHOST_BASE_URL = 'https://localhost/innGrid/src/',
-        url = location.href,
-        baseURL = url.substring(0, url.indexOf('/', 8)); //BaseURL goes till first '/' after http:// or https://
-
-    //returns the base URL if it can't fine https://localhost in the url
-    if (baseURL.indexOf('https://localhost') === -1) {
-        return baseURL + '/';
+    pathArray = window.location.href.split( '/' );
+    protocol = pathArray[0];
+    host = pathArray[2];
+    url = protocol + '//' + host + "/";
+    if (host == "localhost") 
+    {
+        url = $('#project_url').val() + '/'; // for local development
     }
-    else {
-        return LOCALHOST_BASE_URL;
-    }
+    
+    return url;
 };
 
 $('body').on('click','.change_language',function(){
