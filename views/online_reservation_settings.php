@@ -18,8 +18,13 @@
 	    <h3 class="panel-title"><?php echo l('online_booking_engine_widget_code'); ?>:</h3>
 	  </div>
 	  <div class="panel-body">
-	    <textarea id="widget-code" class="form-control">
+	    <textarea id="widget-code" class="form-control" rows="7">
 	    	<div class="minical-booking-widget" name="<?php echo $company_data['company_id']; ?>" style="width:250px;"></div>
+	    	<script>
+			    window.miniCal = window.miniCal || {};
+			    window.miniCal.companyId = <?php echo $company_data['company_id']; ?>;
+			    window.miniCal.projectUrl = '<?php echo base_url();?>';
+			</script>
 		<script src="<?php echo base_url();?>js/widget.js?v=2.0" type="text/javascript"></script></textarea>
 	  </div>
 	</div>

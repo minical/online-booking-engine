@@ -79,13 +79,15 @@
 				endif ?>
 			
                 <?php
-                foreach($view_data['unavailable_room_types'] as $key1 => $unavailable_room_type)
-                {
-            		if($unavailable_room_type['id'] == $rate_plan['room_type_id'])
-            		{
-            			$is_room_type_unavailable = true;
-                        $is_room_bookable = false;
-            		}
+                if(isset($view_data['unavailable_room_types']) && $view_data['unavailable_room_types']){
+                    foreach($view_data['unavailable_room_types'] as $key1 => $unavailable_room_type)
+                    {
+                		if($unavailable_room_type['id'] == $rate_plan['room_type_id'])
+                		{
+                			$is_room_type_unavailable = true;
+                            $is_room_bookable = false;
+                		}
+                    }
                 }
                 if($rate_plan['average_daily_rate'] != 0 || ($company_data['allow_free_bookings'] && (!$rate_plan['charge_type_id'] || $rate_plan['charge_type_id'] == '0')))
                 { 
