@@ -436,7 +436,11 @@ class Online_reservation extends MY_Controller
                 foreach ($rate_plans as $rate_plan) {
                     if ($rate_plan['is_shown_in_online_booking_engine'] == '1')
                     {
-                        $rates = $this->Rate_model->get_daily_rates($rate_plan['rate_plan_id'], $check_in_date, $check_out_date);
+
+                        $checkout_date = date('Y-m-d', strtotime($check_out_date . " + 1 day"));
+
+                        $rates = $this->Rate_model->get_daily_rates($rate_plan['rate_plan_id'], $check_in_date, $checkout_date);
+                        // $rates = $this->Rate_model->get_daily_rates($rate_plan['rate_plan_id'], $check_in_date, $check_out_date);
 
                         $passed_all_restrictions = true;
 
@@ -467,7 +471,7 @@ class Online_reservation extends MY_Controller
                             }
 
                             if (
-                                date('Y-m-d', strtotime($rate['date'] . " + 1 day")) == $check_out_date &&
+                                $rate['date'] == $check_out_date &&
                                 $rate['closed_to_departure'] == '1'
                             ) {
 //                                $passed_all_restrictions = false;
