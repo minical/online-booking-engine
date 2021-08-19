@@ -148,7 +148,7 @@
 				</select>
 			</div>
 		</div>
-        <!--<div class="form-group">
+        <div class="form-group">
             <label for="website_uri" class="col-sm-4 control-label">
                 <?php echo l('Require credit card information'); ?>
                 <p class="help-block h6"></p>
@@ -166,7 +166,7 @@
 
             </div> 
         </div>
-		<div class="form-group">
+		<!--<div class="form-group">
 			<label for="website_uri" class="col-sm-4 control-label">
 				<?php echo l('take_payment_using_paypal'); ?>
 				<p class="help-block h6"></p>

@@ -6,10 +6,7 @@ class Online_reservation extends MY_Controller
     {
         
         parent::__construct();
-
-
-         $this->module_name = $this->router->fetch_module();
-
+        $this->module_name = $this->router->fetch_module();
  
         $this->load->model('../extensions/'.$this->module_name.'/models/Booking_room_history_model');
         $this->load->model('../extensions/'.$this->module_name.'/models/Booking_model');
@@ -450,46 +447,35 @@ class Online_reservation extends MY_Controller
                             }
 
                             if ($rate['minimum_length_of_stay'] > $length_of_stay && isset($rate['minimum_length_of_stay'])) {
-//                                $passed_all_restrictions = false;
                                 $rate_plan['min_length']="This room requires minimum ".$rate['minimum_length_of_stay']." nights of stay";
-
                             }
 
                             if ($rate['maximum_length_of_stay'] < $length_of_stay && isset($rate['maximum_length_of_stay'])) {
-//                                $passed_all_restrictions = false;
                                 $rate_plan['max_length']="This room requires maximum ".$rate['maximum_length_of_stay']." nights of stay";
-
                             }
 
                             if (
                                 $rate['date'] == $check_in_date &&
                                 $rate['closed_to_arrival'] == '1'
                             ) {
-//                                $passed_all_restrictions = false;
                                 $rate_plan['arrival']="please enable close to arrival on selected date";
-
                             }
 
                             if (
                                 $rate['date'] == $check_out_date &&
                                 $rate['closed_to_departure'] == '1'
                             ) {
-//                                $passed_all_restrictions = false;
                                 $rate_plan['departure']="please enable close to departure on selected date";
-
                             }
                         }
 
                         if ($passed_all_restrictions) {
                             $rate_plan['room_type_image_group_id']    = $available_room_type['image_group_id'];
 
-
                             unset($rate_plan['description']);
 
                             $rate_plan['max_adults'] = $available_room_type['max_adults'];
-
                             $available_rate_plans[] = $rate_plan;
-
                         }
                     }
                 }
@@ -739,8 +725,7 @@ class Online_reservation extends MY_Controller
                 $data['main_content'] = '../extensions/'.$this->module_name.'/views/show_reservations';
 
                 $this->template->load('online_reservation_template', null , $data['main_content'], $data);
-
-        
+  
     }
 
     function book_reservation($company_id)
@@ -765,8 +750,6 @@ class Online_reservation extends MY_Controller
 
         $rate_plan_extra = json_decode($data['view_data']['rate_plan_extra'], true);
 
-        // prx($data['view_data']);
-
         $data['company_data']                  = $company_data;
         $data['view_data']['number_of_nights'] = (strtotime($data['view_data']['check_out_date']) - strtotime($data['view_data']['check_in_date'])) / (60 * 60 * 24);
 
@@ -785,8 +768,6 @@ class Online_reservation extends MY_Controller
         unset($data['company_data']['check_in_policies']);
         unset($data['company_data']['invoice_email_header']);
         unset($data['company_data']['booking_confirmation_email_header']);
-
-        //unset($data['company_data']);
 
         $total_tax_percentage            = $this->Tax_model->get_total_tax_percentage_by_charge_type_id($rate_plan['charge_type_id']);
         $total_flat_rate_tax             = $this->Tax_model->get_total_tax_flat_rate_by_charge_type_id($rate_plan['charge_type_id']) * $data['view_data']['number_of_nights'];
@@ -811,9 +792,6 @@ class Online_reservation extends MY_Controller
                 $new_array[$value['extra_id']] = $new_array[$value['extra_id']] + 1;
             }
         }
-
-
-
 
         $grand_extra_total = 0;
         if($rate_plan_extra && count($rate_plan_extra) > 0){
@@ -1030,6 +1008,18 @@ class Online_reservation extends MY_Controller
             );
         endif;
 
+        $data['gateway_credentials']            = $this->paymentgateway->getSelectedGatewayCredentials(1);
+        $gateway_settings                       = $this->paymentgateway->getCompanyGatewaySettings();
+        $data['store_cc_in_booking_engine']     = (bool)$gateway_settings['store_cc_in_booking_engine'];
+        $data['are_gateway_credentials_filled'] = $this->paymentgateway->areGatewayCredentialsFilled();
+        
+        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled']){
+            $this->form_validation->set_rules(
+                'cc_number',
+                'CC number',
+                'required'
+            );
+        }
 
         if (!$data['view_data']['check_in_date'] || !$data['view_data']['check_out_date']) {
             redirect('/online_reservation/select_dates_and_rooms/'.$this->uri->segment(3));
@@ -1051,19 +1041,8 @@ class Online_reservation extends MY_Controller
 
         if ($this->form_validation->run() == false) {
 
-            $this->load->library('tokenex');
-            $data['tokenex_iframe'] = $this->tokenex->_iframe_session_tokenex();
-
-            // payment gateway
-            $data['gateway_credentials']            = $this->paymentgateway->getSelectedGatewayCredentials(1);
-            $gateway_settings                       = $this->paymentgateway->getCompanyGatewaySettings();
-            $data['store_cc_in_booking_engine']     = (bool)$gateway_settings['store_cc_in_booking_engine'];
-            $data['are_gateway_credentials_filled'] = $this->paymentgateway->areGatewayCredentialsFilled();
-           
-
-                $data['main_content'] = '../extensions/'.$this->module_name.'/views/book_reservation';
-
-                $this->template->load('online_reservation_template', null , $data['main_content'], $data);
+            $data['main_content'] = '../extensions/'.$this->module_name.'/views/book_reservation';
+            $this->template->load('online_reservation_template', null , $data['main_content'], $data);
 
         } else {
 
@@ -1099,35 +1078,121 @@ class Online_reservation extends MY_Controller
                     $customer_id = $this->Customer_model->create_customer($customer_data);
                 }
 
-                $token = sqli_clean($this->security->xss_clean($this->input->post('token')));
-                $customer_token = null;
+                // $token = sqli_clean($this->security->xss_clean($this->input->post('token')));
 
-//                Stripe tokenization lines commented below
-                if ($token) {
+                $cc_number = sqli_clean($this->security->xss_clean($this->input->post('cc_number')));
+                $cc_expiry = sqli_clean($this->security->xss_clean($this->input->post('cc_expiry')));
+                $cvc = sqli_clean($this->security->xss_clean($this->input->post('cc_cvc')));
 
-                    $card_details = array(
+                $cc_expiry = explode(' / ', $cc_expiry);
+                $customer_data['cc_expiry_month'] = $cc_expiry_month = $cc_expiry[0];
+                $customer_data['cc_expiry_year'] = $cc_expiry_year = $cc_expiry[1];
+
+                $card_details = array(
                         'is_primary' => 1,
                         'customer_id' => $customer_id,
                         'customer_name' => $customer_data['customer_name'],
                         'card_name' => '',
                         'company_id' => $customer_data['company_id'],
-                        'cc_number' => sqli_clean($this->security->xss_clean($this->input->post('masked_card_number'))),
-                        'cc_expiry_month' => sqli_clean($this->security->xss_clean($this->input->post('cc_expiry_month'))),
-                        'cc_expiry_year' => sqli_clean($this->security->xss_clean($this->input->post('cc_expiry_year'))),
-                        'cc_tokenex_token' => $token,
-                        'cc_cvc_encrypted' => sqli_clean($this->security->xss_clean($this->input->post('cc_cvc_encrypted')))
+                        'cc_expiry_month' => $cc_expiry_month,
+                        'cc_expiry_year' => $cc_expiry_year,
+                        'cc_tokenex_token' => null
                     );
 
-                    $is_card = $this->Card_model->get_customer_cards($customer_id);
-                    if($is_card){
-                        if($is_card > 0) {
-                            $this->Card_model->update_customer_primary_card($customer_id, $card_details);
-                        }
-                    }else{
+                if(
+                    $cc_number && 
+                        is_numeric($cc_number) &&
+                        !strrpos($cc_number, 'X') && 
+                        $cvc && 
+                        is_numeric($cvc) &&
+                        !strrpos($cvc, '*')
+                    )
+                {
+                    $card_data_array = array('card' =>
+                        array(
+                            'card_number'       => $cc_number,
+                            'card_type'         => "",
+                            'cardholder_name'   => (isset($customer_data['customer_name']) ? $customer_data['customer_name'] : ""),
+                            'service_code'      => $cvc,
+                            'expiration_month'  => isset($customer_data['cc_expiry_month']) ? $customer_data['cc_expiry_month'] : null,
+                            'expiration_year'   => isset($customer_data['cc_expiry_year']) ? $customer_data['cc_expiry_year'] : null
+                        )
+                    );
+                    $card_response = array();
+
+                    if($card_data_array && $card_data_array['card']['card_number']) {
+
+                        $card_data_array['customer_data'] = $customer_data;
+
+                        $card_response = apply_filters('post.add.customer', $card_data_array);
+
+                        unset($card_data_array['customer_data']);
+                    }
+                    if(
+                        $card_response &&
+                        isset($card_response['tokenization_response']["data"]) &&
+                        isset($card_response['tokenization_response']["data"]["attributes"]) &&
+                        isset($card_response['tokenization_response']["data"]["attributes"]["card_token"])
+                    ){
+                        $card_token = $card_response['tokenization_response']["data"]["attributes"]["card_token"];
+
+                        $cvc_encrypted = get_cc_cvc_encrypted($cvc, $card_token);
+
+                        $card_details['cc_cvc_encrypted'] = ($cvc_encrypted) ? $cvc_encrypted : "";
+                        $card_details['cc_number'] = 'XXXX XXXX XXXX '.substr($cc_number,-4);
+
+                        $meta['token'] = $card_token;
+                        $card_details['customer_meta_data'] = json_encode($meta);
+                    }
+                }
+
+                $customer_data['cc_number'] = "";
+                $customer_data['cc_expiry_month'] = "";
+                $customer_data['cc_expiry_year'] = "";
+                $customer_data['cc_tokenex_token'] = "";
+                $customer_data['cc_cvc_encrypted'] = "";
+
+                $check_data = $this->Card_model->get_customer_primary_card($customer_id);
+        
+                if(empty($check_data)){
+                    $this->Customer_model->update_customer($customer_id, $customer_data);
+                    if(isset($cc_number)){
                         $this->Card_model->create_customer_card_info($card_details);
                     }
-                    $this->Customer_model->update_customer($customer_id, $customer_data);
                 }
+
+
+
+
+
+
+
+//                Stripe tokenization lines commented below
+                // if ($token) {
+
+                //     $card_details = array(
+                //         'is_primary' => 1,
+                //         'customer_id' => $customer_id,
+                //         'customer_name' => $customer_data['customer_name'],
+                //         'card_name' => '',
+                //         'company_id' => $customer_data['company_id'],
+                //         'cc_number' => sqli_clean($this->security->xss_clean($this->input->post('masked_card_number'))),
+                //         'cc_expiry_month' => sqli_clean($this->security->xss_clean($this->input->post('cc_expiry_month'))),
+                //         'cc_expiry_year' => sqli_clean($this->security->xss_clean($this->input->post('cc_expiry_year'))),
+                //         'cc_tokenex_token' => $token,
+                //         'cc_cvc_encrypted' => sqli_clean($this->security->xss_clean($this->input->post('cc_cvc_encrypted')))
+                //     );
+
+                //     $is_card = $this->Card_model->get_customer_cards($customer_id);
+                //     if($is_card){
+                //         if($is_card > 0) {
+                //             $this->Card_model->update_customer_primary_card($customer_id, $card_details);
+                //         }
+                //     }else{
+                //         $this->Card_model->create_customer_card_info($card_details);
+                //     }
+                //     $this->Customer_model->update_customer($customer_id, $customer_data);
+                // }
 
                 //Create Booking(s)
                 $bookings = array();
@@ -1302,31 +1367,31 @@ class Online_reservation extends MY_Controller
                     //Create a corresponding invoice
                     $this->Invoice_model->create_invoice($booking_id);
 
-                    try {
-                        // add booking info into CM DB
-                        $request_data = $_REQUEST;
-                        $request_data['adult-count'] = $data['view_data']['adult_count'];
-                        $request_data['children-count'] = $data['view_data']['children_count'];
-                        $request_data['rate'] = $rate_plan['average_daily_rate'];
-                        $request_data['total'] = $data['view_data']['total'];
-                        $request_data['number-of-nights'] = $data['view_data']['number_of_nights'];
+                    // try {
+                    //     // add booking info into CM DB
+                    //     $request_data = $_REQUEST;
+                    //     $request_data['adult-count'] = $data['view_data']['adult_count'];
+                    //     $request_data['children-count'] = $data['view_data']['children_count'];
+                    //     $request_data['rate'] = $rate_plan['average_daily_rate'];
+                    //     $request_data['total'] = $data['view_data']['total'];
+                    //     $request_data['number-of-nights'] = $data['view_data']['number_of_nights'];
 
-                        $log_data = http_build_query(
-                            array(
-                                'check_in_date' => $booking_history['check_in_date'],
-                                'check_out_date' => $booking_history['check_out_date'],
-                                'booking_id' => $booking_history['booking_id'],
-                                'log' => json_encode($request_data),
-                            )
-                        );
+                    //     $log_data = http_build_query(
+                    //         array(
+                    //             'check_in_date' => $booking_history['check_in_date'],
+                    //             'check_out_date' => $booking_history['check_out_date'],
+                    //             'booking_id' => $booking_history['booking_id'],
+                    //             'log' => json_encode($request_data),
+                    //         )
+                    //     );
 
-                        $req = Requests::post(
-                            $this->config->item('cm_url') . '/sync/add_booking_engine_logs/', array(
-                            'X-API-KEY' => $this->config->item('api_key')
-                        ), $log_data);
-                    } catch (Exception $e) {
+                    //     $req = Requests::post(
+                    //         $this->config->item('cm_url') . '/sync/add_booking_engine_logs/', array(
+                    //         'X-API-KEY' => $this->config->item('api_key')
+                    //     ), $log_data);
+                    // } catch (Exception $e) {
 
-                    }
+                    // }
                 }
 
                 $room_type = $this->Room_type_model->get_room_type_by_room_id($booking_history['room_id']);

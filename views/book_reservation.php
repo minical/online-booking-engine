@@ -351,20 +351,24 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                         <?php } endforeach; endif;?>
 
                     <?php if ($store_cc_in_booking_engine and $are_gateway_credentials_filled): ?>
-                        <script>
+                        <!-- <script>
                             var stripe_publishable_key = "<?php echo isset($gateway_credentials['stripe_publishable_key']) ? $gateway_credentials['stripe_publishable_key'] : '';?>";
-                        </script>
+                        </script> -->
                         <div class="form-group">
                             <label for="birthday" class=" col-md-3 control-label"><?php echo l('Credit card'); ?>
                                 <span style="color:red;">*</span>
                             </label>
 
                             <div class="form-group form-group-inner col-md-6" style="margin:0;">
-                                <!--<input class="form-control" name="cc_number" data-cc="cc" placeholder="•••• •••• •••• ••••">-->
-                                
-                                <iframe id="credit_card_iframe" style="width: 100%;height: 35px;border: none;" scrolling="no" frameborder="0" src="<?=$tokenex_iframe['iframe_url'];?>"></iframe>
-                                <img id="card-image" style="position: absolute;top: 3px;right: 18px;width: auto;height: 28px;padding: 0;display: none;" src="">
-                                <div class="credit_card_iframe help-block with-errors"></div>
+                                <input 
+                                    class="form-control" 
+                                    name="cc_number" 
+                                    type="text"
+                                    value="<?php echo set_value('cc_number'); ?>"
+                                    placeholder="•••• •••• •••• ••••"
+                                    data-error= "<?php echo l('Please enter CC number', true); ?>" <?php echo 'required'; ?>
+                                />
+                                <div class="help-block with-errors"></div>
                             </div>
 
                             <div class="form-group col-md-3" style="margin:0;">
