@@ -1202,7 +1202,7 @@ class Online_reservation extends MY_Controller
                     $booking_data['rate_plan_id']  = $data['view_data']['rate_plan_selected_ids'][$selected_room_index];
                     $booking_data['use_rate_plan'] = 1;
                     
-                    $booking_data['rate']    = number_format($rate_plan['average_daily_rate'], 2, ".", ",");
+                    $booking_data['rate']    = $rate_plan['average_daily_rate'];
 
                     $booking_data['adult_count']    = $data['view_data']['adult_count'][$selected_room_index];
                     $booking_data['children_count'] = $data['view_data']['children_count'][$selected_room_index];
@@ -1235,6 +1235,9 @@ class Online_reservation extends MY_Controller
                     }
 
                     $booking_id = $this->Booking_model->create_booking($booking_data);
+
+                    $booking_data['rate']    = number_format($rate_plan['average_daily_rate'], 2, ".", ",");
+
                     $bookings[] = $booking_id;
 
                     $booking_history               = array();
