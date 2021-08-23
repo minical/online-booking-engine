@@ -42,22 +42,50 @@ class Room_type_model extends CI_Model {
                 'X-API-KEY'                 => $company_access_key ? $company_access_key : $this->company_api_key
             )
         );
-        $req = Requests::get($this->config->item('api_url').'/v1/inventory/availability?'.$query);
+        $req = $this->call_api($this->config->item('api_url').'/v1/inventory/availability?'.$query, array(), array(), 'GET');
+
+        // $req = Requests::get($this->config->item('api_url').'/v1/inventory/availability?'.$query);
         // if response empty aka no availability, ensure actual array is created anyway
-		if(isset($_GET['dev_mode']) && $_GET['dev_mode'] === "b1m8V0I5ZT"){
-			echo $this->config->item('api_url').'/v1/inventory/availability?'.$query;
-		}
-//		print_r($req);die;
-		
-		$avail_array = $req->body ? json_decode($req->body, true) : null;
+        if(isset($_GET['dev_mode']) && $_GET['dev_mode'] === "b1m8V0I5ZT"){
+            echo $this->config->item('api_url').'/v1/inventory/availability?'.$query;
+        }
+//      print_r($req);die;
+        
+        // $avail_array = $req->body ? json_decode($req->body, true) : null;
+        $avail_array = $req ? json_decode($req, true) : null;
         $avail_array = empty($avail_array) ? array() : $avail_array;
 
         foreach ($avail_array as $room_type_id => $room_type_availability) {
             $inventory[$room_type_id]['availability'] = $room_type_availability;
         }
-		
+        
         return $inventory;
 	}
+
+	public function call_api($api_url, $data, $headers, $method_type = 'POST'){
+
+        $url = $api_url;
+        
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+            
+        if($method_type == 'GET'){
+
+        } else {
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+        }
+               
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+        $response = curl_exec($curl);
+        
+        curl_close($curl);
+        
+        return $response;
+    }
     
     // get net availability
 
