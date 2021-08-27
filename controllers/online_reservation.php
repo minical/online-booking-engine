@@ -1122,6 +1122,7 @@ class Online_reservation extends MY_Controller
 
                     if($card_data_array && $card_data_array['card']['card_number']) {
 
+                        $customer_data['customer_id'] = $customer_id;
                         $card_data_array['customer_data'] = $customer_data;
 
                         $card_response = apply_filters('post.add.customer', $card_data_array);
@@ -1237,7 +1238,7 @@ class Online_reservation extends MY_Controller
                     $booking_id = $this->Booking_model->create_booking($booking_data);
 
                     $booking_data['rate']    = number_format($rate_plan['average_daily_rate'], 2, ".", ",");
-
+                    
                     $bookings[] = $booking_id;
 
                     $booking_history               = array();
