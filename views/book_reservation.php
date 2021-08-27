@@ -350,6 +350,9 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                         </div>
                         <?php } endforeach; endif;?>
 
+                        <input type="hidden" name="store_cc_in_booking_engine" id="store_cc_in_booking_engine" value="<?php echo $store_cc_in_booking_engine; ?>">
+                        <input type="hidden" name="are_gateway_credentials_filled" id="are_gateway_credentials_filled" value="<?php echo $are_gateway_credentials_filled; ?>">
+
                     <?php if ($store_cc_in_booking_engine and $are_gateway_credentials_filled): ?>
                         <!-- <script>
                             var stripe_publishable_key = "<?php echo isset($gateway_credentials['stripe_publishable_key']) ? $gateway_credentials['stripe_publishable_key'] : '';?>";

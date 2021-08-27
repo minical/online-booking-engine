@@ -8,169 +8,174 @@ $(function () {
     })
 
 
-    // mask fields
-    if($.payment){
-        $('[name="cc_expiry"]').payment('formatCardExpiry');
-        $('[name="cc_cvc"]').payment('formatCardCVC');
+    var storeCCInBookingEngine = $('#store_cc_in_booking_engine').val();
+    var areGatewayCredentialsFilled = $('#are_gateway_credentials_filled').val();
 
-        var $form = $("#guest-information-form");
+    if(storeCCInBookingEngine == 1 && areGatewayCredentialsFilled == 1){
+        // mask fields
+        if($.payment){
+            $('[name="cc_expiry"]').payment('formatCardExpiry');
+            $('[name="cc_cvc"]').payment('formatCardCVC');
 
-        $form.validator({
-            custom: {
-                cvc   : function ($el) {
-                    return $.payment.validateCardCVC($el.val());
+            var $form = $("#guest-information-form");
+
+            $form.validator({
+                custom: {
+                    cvc   : function ($el) {
+                        return $.payment.validateCardCVC($el.val());
+                    },
+                    expiry: function ($el) {
+                        var date = $el.payment('cardExpiryVal');
+                        return $.payment.validateCardExpiry(date.month, date.year);
+                    }
                 },
-                expiry: function ($el) {
-                    var date = $el.payment('cardExpiryVal');
-                    return $.payment.validateCardExpiry(date.month, date.year);
+                errors: {
+                    cvc   : 'Invalid cvc code',
+                    expiry: 'Invalid date'
                 }
-            },
-            errors: {
-                cvc   : 'Invalid cvc code',
-                expiry: 'Invalid date'
-            }
-        });
+            });
 
-        $form.validator().on('submit', function (e) {
+            $form.validator().on('submit', function (e) {
 
-            if(typeof submitLock !=="undefined" && submitLock){
-                return false;
-            }
-            
-            var submit = false;
-            submitLock = true;
-            $('input[type="submit"]').attr('disabled', true);
-            
-            var $expiry = $('input[name="cc_expiry"]');
-            var $cvc = $('input[name="cc_cvc"]');
-            var validation_passed = !e.isDefaultPrevented();
-            
-            var date = $expiry.payment('cardExpiryVal');
-            
-            if (validation_passed) {
+                if(typeof submitLock !=="undefined" && submitLock){
+                    return false;
+                }
                 
-                // not using stripe tokenization anymore, using tokenex below
-                //tokenizeAndSubmit($expiry, $card, $cvc);
-
-                innGrid.deferredCreditCardValidation = $.Deferred();
-
-                $.when(innGrid.deferredCreditCardValidation)
-                    .then(function(){
-                        // user entered valid card number
-                        innGrid.deferredWaitForTokenization = $.Deferred();
-
-                        $('#credit_card_iframe')[0].contentWindow.postMessage('tokenize', '*');
-
-                        $.when(innGrid.deferredWaitForTokenization)
-                            .then(function (data) {
-                                var token = data.token;
-                                var year = (date.year.toString().length > 2 ? date.year.toString().substring(2) : date.year).toString();
-                                var masked_card_number = 'XXXX XXXX XXXX '+data.lastFour;
-                                $form.append("<input type='hidden' name='token' value='" + token + "' />");
-                                $form.append("<input type='hidden' name='masked_card_number' value='" + masked_card_number + "' />");
-                                $form.append("<input type='hidden' name='cc_expiry_month' value='" + ('0' + date.month).slice(-2) + "' />");
-                                $form.append("<input type='hidden' name='cc_expiry_year' value='" + year + "' />");
-                                $form.append("<input type='hidden' name='cc_cvc_encrypted' value='" + data.cc_cvc_encrypted + "' />");
-                                
-                                $form[0].submit();
-                                //submitLock = false;
-                                //$('input[type="submit"]').attr('disabled', false);
-                            })
-                            .fail(function (message) {
-                                alert(message);
-                                submitLock = false;
-                                $('input[type="submit"]').attr('disabled', false);
-                            });
-                    })
-                    .fail(function(validator){
-                        var errorMsg = "\n"+l('Invalid credit card number');
-                        $('.credit_card_iframe.with-errors').text(errorMsg).parent().addClass('has-error');
-                        submitLock = false;
-                        $('input[type="submit"]').attr('disabled', false);
-                        return;
-                    });
-                $('.credit_card_iframe.with-errors').text('').parent().removeClass('has-error');
-                $('#credit_card_iframe')[0].contentWindow.postMessage('validate', '*');
+                var submit = false;
+                submitLock = true;
+                $('input[type="submit"]').attr('disabled', true);
                 
-                return false;
-            }else{
-                submitLock = false;
-                $('input[type="submit"]').attr('disabled', false);
-            }
-        });
-    }
-    
-    var _iframe_listener = function(event){
-        if (event.origin === 'https://htp.tokenex.com' || event.origin === 'https://test-htp.tokenex.com') {
-            var message = JSON.parse(event.data);
-            switch (message.event) {
-                case 'focus':
-                    $('#credit_card_iframe')[0].contentWindow.postMessage('enablePrettyFormat', '*');
-                    break;
-                case 'cardTypeChange':
-                    if(message.data.possibleCardType){
-                        $('#card-image').attr('src', getBaseURL()+'images/cards/'+message.data.possibleCardType+'.jpg').show();
-                    }
-                    break;
-                case 'validation':
-                    if (!message.data.isValid) {
-                        //field failed validation
-                        if(message.data.validator == "invalid" && innGrid.deferredCreditCardValidation && 
-                                typeof innGrid.deferredCreditCardValidation.resolve === "function") 
-                        {
-                            innGrid.deferredCreditCardValidation.reject('invalid');
-                        } 
-                        else if(message.data.validator == "required" && innGrid.deferredCreditCardValidation && 
-                                typeof innGrid.deferredCreditCardValidation.resolve === "function") 
-                        {
-                            innGrid.deferredCreditCardValidation.reject('required');
-                        }
-                    } else {
-                        //validation valid!
-                        if(innGrid.deferredCreditCardValidation && typeof innGrid.deferredCreditCardValidation.resolve === "function") {
-                            innGrid.deferredCreditCardValidation.resolve();
-                        }
-                    }
-                    break;
-                case 'post':
-                    if (!message.data.success) {
-                      // use message.data.error
-                    } else {
-                        //get token! message.data.token                        
-                        var cvc = $('[name="cc_cvc"]').val();
-                        if(cvc){
-                            $.ajax({
-                                type: "POST",
-                                url: getBaseURL() + "customer/get_cc_cvc_encrypted",
-                                data: {
-                                    token: message.data.token,
-                                    cvc: cvc
-                                },
-                                dataType: "json",
-                                success: function (data) {
-                                    if(data.success){
-                                        message.data.cc_cvc_encrypted = data.cc_cvc_encrypted;
-                                        innGrid.deferredWaitForTokenization.resolve(message.data);
-                                    }else
-                                        innGrid.deferredWaitForTokenization.resolve(message.data);
-                                },
-                                error: function(error){
-                                    innGrid.deferredWaitForTokenization.resolve(message.data);
-                                }
-                            });     
-                        }else{
-                            innGrid.deferredWaitForTokenization.resolve(message.data);
-                        }
-                    }
-                    break;
-            }
+                var $expiry = $('input[name="cc_expiry"]');
+                var $cvc = $('input[name="cc_cvc"]');
+                var validation_passed = !e.isDefaultPrevented();
+                
+                var date = $expiry.payment('cardExpiryVal');
+                
+                if (validation_passed) {
+                    
+                    // not using stripe tokenization anymore, using tokenex below
+                    //tokenizeAndSubmit($expiry, $card, $cvc);
+
+                    innGrid.deferredCreditCardValidation = $.Deferred();
+
+                    $.when(innGrid.deferredCreditCardValidation)
+                        .then(function(){
+                            // user entered valid card number
+                            innGrid.deferredWaitForTokenization = $.Deferred();
+
+                            $('#credit_card_iframe')[0].contentWindow.postMessage('tokenize', '*');
+
+                            $.when(innGrid.deferredWaitForTokenization)
+                                .then(function (data) {
+                                    var token = data.token;
+                                    var year = (date.year.toString().length > 2 ? date.year.toString().substring(2) : date.year).toString();
+                                    var masked_card_number = 'XXXX XXXX XXXX '+data.lastFour;
+                                    $form.append("<input type='hidden' name='token' value='" + token + "' />");
+                                    $form.append("<input type='hidden' name='masked_card_number' value='" + masked_card_number + "' />");
+                                    $form.append("<input type='hidden' name='cc_expiry_month' value='" + ('0' + date.month).slice(-2) + "' />");
+                                    $form.append("<input type='hidden' name='cc_expiry_year' value='" + year + "' />");
+                                    $form.append("<input type='hidden' name='cc_cvc_encrypted' value='" + data.cc_cvc_encrypted + "' />");
+                                    
+                                    $form[0].submit();
+                                    //submitLock = false;
+                                    //$('input[type="submit"]').attr('disabled', false);
+                                })
+                                .fail(function (message) {
+                                    alert(message);
+                                    submitLock = false;
+                                    $('input[type="submit"]').attr('disabled', false);
+                                });
+                        })
+                        .fail(function(validator){
+                            var errorMsg = "\n"+l('Invalid credit card number');
+                            $('.credit_card_iframe.with-errors').text(errorMsg).parent().addClass('has-error');
+                            submitLock = false;
+                            $('input[type="submit"]').attr('disabled', false);
+                            return;
+                        });
+                    $('.credit_card_iframe.with-errors').text('').parent().removeClass('has-error');
+                    $('#credit_card_iframe')[0].contentWindow.postMessage('validate', '*');
+                    
+                    return false;
+                }else{
+                    submitLock = false;
+                    $('input[type="submit"]').attr('disabled', false);
+                }
+            });
         }
-    };
-    
-    if (window.addEventListener) {
-        addEventListener("message", _iframe_listener, false);
-    } else {
-        attachEvent("onmessage", _iframe_listener);
+        
+        var _iframe_listener = function(event){
+            if (event.origin === 'https://htp.tokenex.com' || event.origin === 'https://test-htp.tokenex.com') {
+                var message = JSON.parse(event.data);
+                switch (message.event) {
+                    case 'focus':
+                        $('#credit_card_iframe')[0].contentWindow.postMessage('enablePrettyFormat', '*');
+                        break;
+                    case 'cardTypeChange':
+                        if(message.data.possibleCardType){
+                            $('#card-image').attr('src', getBaseURL()+'images/cards/'+message.data.possibleCardType+'.jpg').show();
+                        }
+                        break;
+                    case 'validation':
+                        if (!message.data.isValid) {
+                            //field failed validation
+                            if(message.data.validator == "invalid" && innGrid.deferredCreditCardValidation && 
+                                    typeof innGrid.deferredCreditCardValidation.resolve === "function") 
+                            {
+                                innGrid.deferredCreditCardValidation.reject('invalid');
+                            } 
+                            else if(message.data.validator == "required" && innGrid.deferredCreditCardValidation && 
+                                    typeof innGrid.deferredCreditCardValidation.resolve === "function") 
+                            {
+                                innGrid.deferredCreditCardValidation.reject('required');
+                            }
+                        } else {
+                            //validation valid!
+                            if(innGrid.deferredCreditCardValidation && typeof innGrid.deferredCreditCardValidation.resolve === "function") {
+                                innGrid.deferredCreditCardValidation.resolve();
+                            }
+                        }
+                        break;
+                    case 'post':
+                        if (!message.data.success) {
+                          // use message.data.error
+                        } else {
+                            //get token! message.data.token                        
+                            var cvc = $('[name="cc_cvc"]').val();
+                            if(cvc){
+                                $.ajax({
+                                    type: "POST",
+                                    url: getBaseURL() + "customer/get_cc_cvc_encrypted",
+                                    data: {
+                                        token: message.data.token,
+                                        cvc: cvc
+                                    },
+                                    dataType: "json",
+                                    success: function (data) {
+                                        if(data.success){
+                                            message.data.cc_cvc_encrypted = data.cc_cvc_encrypted;
+                                            innGrid.deferredWaitForTokenization.resolve(message.data);
+                                        }else
+                                            innGrid.deferredWaitForTokenization.resolve(message.data);
+                                    },
+                                    error: function(error){
+                                        innGrid.deferredWaitForTokenization.resolve(message.data);
+                                    }
+                                });     
+                            }else{
+                                innGrid.deferredWaitForTokenization.resolve(message.data);
+                            }
+                        }
+                        break;
+                }
+            }
+        };
+        
+        if (window.addEventListener) {
+            addEventListener("message", _iframe_listener, false);
+        } else {
+            attachEvent("onmessage", _iframe_listener);
+        }
     }
 
 });
