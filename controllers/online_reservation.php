@@ -1252,6 +1252,16 @@ class Online_reservation extends MY_Controller
 
                     $this->Booking_room_history_model->create_booking_room_history($booking_history);
 
+                     $booking_action_data = array(
+                        'booking_id' => $booking_id,  
+                        'company_id'=> $this->company_id,
+                        'booking_type'=>"new",
+                        'booking_from'=>"Booking Engine"
+
+                    );
+
+                     do_action('post.add.booking', $booking_action_data);
+
                     $selling_date = $this->Company_model->get_selling_date($company_id);
 
                     if($rate_plan_extra && count($rate_plan_extra) > 0) {
