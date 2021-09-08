@@ -48,13 +48,13 @@
 	  <div class="panel-body">
 	    <ul class="bullet-points">
 			<li>
-				<?php echo l('Create', true); ?> <a href="<?php echo base_url();?>rates/rate_plans"><?php echo l('Rate Plans', true); ?></a>, <?php echo l('and set availability & rates.', true); ?>
+				<?php echo l('Create', true); ?> <a href="<?php echo base_url();?>settings/rates/rate_plans"><?php echo l('Rate Plans', true); ?></a>, <?php echo l('and set availability & rates.', true); ?>
 			</li>
 			<li>
-				<?php echo l('Update your property information in', true); ?> <a href="<?php echo base_url();?>company/general"><?php echo l('Property Settings', true); ?></a>
+				<?php echo l('Update your property information in', true); ?> <a href="<?php echo base_url();?>settings/company/general"><?php echo l('Property Settings', true); ?></a>
 			</li>
 			<li>
-				<?php echo l('Set the appropriate rooms in', true); ?> <a href="<?php echo base_url();?>room_inventory/rooms"><?php echo l('Room Settings', true); ?></a> <?php echo l("to 'can be sold online'.", true); ?>
+				<?php echo l('Set the appropriate rooms in', true); ?> <a href="<?php echo base_url();?>settings/room_inventory/rooms"><?php echo l('Room Settings', true); ?></a> <?php echo l("to 'can be sold online'.", true); ?>
 			</li>
 		</ul>
 	  </div>
