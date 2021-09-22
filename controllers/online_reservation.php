@@ -1042,13 +1042,20 @@ class Online_reservation extends MY_Controller
 
         $data['current_step'] = 3;
 
-        if ($this->form_validation->run() == false) {
+        $nexio_active = sqli_clean($this->security->xss_clean($this->input->post('nexio_active')));
 
+        if ($this->form_validation->run() == FALSE && $nexio_active == 0) {           
             $data['main_content'] = '../extensions/'.$this->module_name.'/views/book_reservation';
             $this->template->load('online_reservation_template', null , $data['main_content'], $data);
 
-        } else {
-
+        }elseif($gateway_settings['selected_payment_gateway'] == 'nexio' && $this->form_validation->run() == FALSE && $nexio_active == 1){
+            $response = array(
+                'status' => 'error',
+                'message' => "please fill all the required fields."
+            );
+             echo json_encode($response);
+        }
+         else {
             //Verify that rooms are still available for booking
             //because the rooms may have been booked
             //while going through the online reservation process.
@@ -1123,15 +1130,13 @@ class Online_reservation extends MY_Controller
                     );
                     $card_response = array();
 
-                    // if($card_data_array && $card_data_array['card']['card_number']) {
+                    if($card_data_array && $card_data_array['card']['card_number'] && $gateway_settings['selected_payment_gateway'] == 'nexio') {
 
                         $customer_data['customer_id'] = $customer_id;
                         $card_data_array['customer_data'] = $customer_data;
-
-                    //      $card_response = apply_filters('post.add.customer', $card_data_array);
-
-                    //     unset($card_data_array['customer_data']);
-                    // }
+                        $card_response = apply_filters('post.add.customer', $card_data_array);
+                        unset($card_data_array['customer_data']);
+                    }
                     if(
                         $card_response &&
                         isset($card_response['tokenization_response']["data"]) &&
@@ -1458,13 +1463,17 @@ class Online_reservation extends MY_Controller
                     
 
                 $this->session->set_userdata($data);
-                // redirect('/online_reservation/reservation_success/'.$this->uri->segment(3));
-                $res = array(
-                    'customer_id' => $customer_id,
-                    "url" => 'online_reservation/reservation_success/'.$this->uri->segment(3)
-                );
-                echo json_encode($res);
-                
+
+                if($gateway_settings['selected_payment_gateway'] == 'nexio' && $nexio_active == 1){
+                    $res = array(
+                        'customer_id' => $customer_id,
+                        "url" => 'online_reservation/reservation_success/'.$this->uri->segment(3)
+                    );
+                    echo json_encode($res);
+                  
+                }else{
+                    redirect('/online_reservation/reservation_success/'.$this->uri->segment(3)); 
+                }  
 
             } else {
                 echo l('We\'re sorry. The rooms you selected are no longer available. Please start over and select new rooms.', true);
@@ -1475,7 +1484,7 @@ class Online_reservation extends MY_Controller
     function reservation_success () {
         $data = $this->session->all_userdata();
         $data['main_content'] = '../extensions/'.$this->module_name.'/views/reservation_success';
-$this->template->load('online_reservation_template', null , $data['main_content'], $data);
+        $this->template->load('online_reservation_template', null , $data['main_content'], $data);
         // $this->load->view('includes/online_reservation_template', $data);
     }
 

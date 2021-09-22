@@ -860,10 +860,9 @@ $(document).on('click', '.qty_minus', function() {
         console.log(extraCharges);
     }
 });
-
-
 var form = $("#guest-information-form");
 $("#booking_engine_form").click(function() {
+    $("#nexio_active").val("1");
     $.ajax({
         type: "POST",
         url: form.attr("action"),
@@ -875,10 +874,13 @@ $("#booking_engine_form").click(function() {
                 document.dispatchEvent(event);
                 setTimeout(function() {
                     window.location = getBaseURL() + response.url;
-                }, 3000);
-                //     window.location = getBaseURL() + response.url;
+                }, 500);
+            } else if (response.status == 'error') {
+                alert(response.message);
+                setTimeout(function() {
+                    location.reload();
+                }, 1000);
             }
-
         }
     });
 });

@@ -445,10 +445,15 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
 
                         </div>
                     </div>
+                    
+                    <?php 
+                     if(isset($this->module_assets_files['nexio_integration']) && $this->company_data['selected_payment_gateway'] =='nexio'){?>
+                        <input type="hidden" value='0' name='nexio_active' id='nexio_active' class='nexio_active'>
+                        <input type="button" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right" id="booking_engine_form"/>
+                    <?php }else{?>
+                        <input type="submit" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right" />
 
-
-                    <input type="button" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right" id="booking_engine_form"/>
-
+                    <?php }?>
                 </form>
             </div>
         </div>
