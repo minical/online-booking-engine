@@ -1015,8 +1015,8 @@ class Online_reservation extends MY_Controller
         $gateway_settings                       = $this->paymentgateway->getCompanyGatewaySettings();
         $data['store_cc_in_booking_engine']     = (bool)$gateway_settings['store_cc_in_booking_engine'];
         $data['are_gateway_credentials_filled'] = $this->paymentgateway->areGatewayCredentialsFilled();
-        
-        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled']){
+      
+        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] !== 'nexio'){
             $this->form_validation->set_rules(
                 'cc_number',
                 'CC number',
@@ -1042,13 +1042,20 @@ class Online_reservation extends MY_Controller
 
         $data['current_step'] = 3;
 
-        if ($this->form_validation->run() == false) {
+        $nexio_active = sqli_clean($this->security->xss_clean($this->input->post('nexio_active')));
 
+        if ($this->form_validation->run() == FALSE && $nexio_active == 0) {           
             $data['main_content'] = '../extensions/'.$this->module_name.'/views/book_reservation';
             $this->template->load('online_reservation_template', null , $data['main_content'], $data);
 
-        } else {
-
+        }elseif($gateway_settings['selected_payment_gateway'] == 'nexio' && $this->form_validation->run() == FALSE && $nexio_active == 1){
+            $response = array(
+                'status' => 'error',
+                'message' => "please fill all the required fields."
+            );
+             echo json_encode($response);
+        }
+         else {
             //Verify that rooms are still available for booking
             //because the rooms may have been booked
             //while going through the online reservation process.
@@ -1088,8 +1095,8 @@ class Online_reservation extends MY_Controller
                 $cvc = sqli_clean($this->security->xss_clean($this->input->post('cc_cvc')));
 
                 $cc_expiry = explode(' / ', $cc_expiry);
-                $customer_data['cc_expiry_month'] = $cc_expiry_month = $cc_expiry[0];
-                $customer_data['cc_expiry_year'] = $cc_expiry_year = $cc_expiry[1];
+                $customer_data['cc_expiry_month'] = $cc_expiry_month = $cc_expiry[0] ?? null;
+                $customer_data['cc_expiry_year'] = $cc_expiry_year = $cc_expiry[1] ?? null;
 
                 $card_details = array(
                         'is_primary' => 1,
@@ -1123,13 +1130,11 @@ class Online_reservation extends MY_Controller
                     );
                     $card_response = array();
 
-                    if($card_data_array && $card_data_array['card']['card_number']) {
+                    if($card_data_array && $card_data_array['card']['card_number'] && $gateway_settings['selected_payment_gateway'] == 'nexio') {
 
                         $customer_data['customer_id'] = $customer_id;
                         $card_data_array['customer_data'] = $customer_data;
-
                         $card_response = apply_filters('post.add.customer', $card_data_array);
-
                         unset($card_data_array['customer_data']);
                     }
                     if(
@@ -1164,12 +1169,6 @@ class Online_reservation extends MY_Controller
                         $this->Card_model->create_customer_card_info($card_details);
                     }
                 }
-
-
-
-
-
-
 
 //                Stripe tokenization lines commented below
                 // if ($token) {
@@ -1446,6 +1445,7 @@ class Online_reservation extends MY_Controller
 
                 // generate PayPal data for the reservation_success page
                 $data['paypal_data'] = Array(
+                    "customer_id"                           => $customer_id,
                     'company_id'                            => $company_id,
                     'booking_id'                            => $booking_id,
                     'required_payment'                      => ($data['view_data']['total'] * ($company_data['percentage_of_required_paypal_payment'] / 100)),
@@ -1463,7 +1463,17 @@ class Online_reservation extends MY_Controller
                     
 
                 $this->session->set_userdata($data);
-                redirect('/online_reservation/reservation_success/'.$this->uri->segment(3));
+
+                if($gateway_settings['selected_payment_gateway'] == 'nexio' && $nexio_active == 1){
+                    $res = array(
+                        'customer_id' => $customer_id,
+                        "url" => 'online_reservation/reservation_success/'.$this->uri->segment(3)
+                    );
+                    echo json_encode($res);
+                  
+                }else{
+                    redirect('/online_reservation/reservation_success/'.$this->uri->segment(3)); 
+                }  
 
             } else {
                 echo l('We\'re sorry. The rooms you selected are no longer available. Please start over and select new rooms.', true);
@@ -1474,7 +1484,7 @@ class Online_reservation extends MY_Controller
     function reservation_success () {
         $data = $this->session->all_userdata();
         $data['main_content'] = '../extensions/'.$this->module_name.'/views/reservation_success';
-$this->template->load('online_reservation_template', null , $data['main_content'], $data);
+        $this->template->load('online_reservation_template', null , $data['main_content'], $data);
         // $this->load->view('includes/online_reservation_template', $data);
     }
 

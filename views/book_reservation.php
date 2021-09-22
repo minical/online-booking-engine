@@ -357,7 +357,7 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                         <!-- <script>
                             var stripe_publishable_key = "<?php echo isset($gateway_credentials['stripe_publishable_key']) ? $gateway_credentials['stripe_publishable_key'] : '';?>";
                         </script> -->
-                        <div class="form-group">
+                        <div class="form-group cc_details">
                             <label for="birthday" class=" col-md-3 control-label"><?php echo l('Credit card'); ?>
                                 <span style="color:red;">*</span>
                             </label>
@@ -386,7 +386,7 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                                 <div class="help-block with-errors"></div>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group cc_details cvc_code">
                             <label for="cvc" class="col-lg-3 control-label"><?php echo l('CVC'); ?>
                                 <span style="color:red;">*</span>
                             </label>
@@ -445,10 +445,15 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
 
                         </div>
                     </div>
+                    
+                    <?php 
+                     if(isset($this->module_assets_files['nexio_integration']) && $this->company_data['selected_payment_gateway'] =='nexio'){?>
+                        <input type="hidden" value='0' name='nexio_active' id='nexio_active' class='nexio_active'>
+                        <input type="button" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right" id="booking_engine_form"/>
+                    <?php }else{?>
+                        <input type="submit" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right" />
 
-
-                    <input type="submit" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right"/>
-
+                    <?php }?>
                 </form>
             </div>
         </div>
