@@ -867,14 +867,15 @@ $("#booking_engine_form").click(function() {
         type: "POST",
         url: form.attr("action"),
         dataType: 'JSON',
-        data: $("#guest-information-form input").serialize(), //only input
+        data: $("#guest-information-form").serialize(), //only input
         success: function(response) {
+            console.log(response);
             if (response.customer_id != null) {
                 var event = new CustomEvent('post.submit_user', { 'detail': { "customer_id": response.customer_id } });
                 document.dispatchEvent(event);
                 setTimeout(function() {
                     window.location = getBaseURL() + response.url;
-                }, 500);
+                }, 3000);
             } else if (response.status == 'error') {
                 alert(response.message);
                 setTimeout(function() {
