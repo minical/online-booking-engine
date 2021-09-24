@@ -1434,12 +1434,12 @@ class Online_reservation extends MY_Controller
 
 
                 $data['css_files'] = array(
-                    base_url().auto_version('css/online-reservation.css')
+                    // base_url().auto_version('css/online-reservation.css')
                 );
 
                 $data['js_files'] = array(
-                    base_url().'js/moment.min.js',
-                    base_url().auto_version('js/online-reservation.js'),
+                    // base_url().'js/moment.min.js',
+                    // base_url().auto_version('js/online-reservation.js'),
                 );
 
 
