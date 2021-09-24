@@ -1433,14 +1433,14 @@ class Online_reservation extends MY_Controller
                 $this->email_template->send_booking_alert_email($booking_id);
 
 
-                $data['css_files'] = array(
-                    base_url().auto_version('css/online-reservation.css')
-                );
+                // $data['css_files'] = array(
+                    // base_url().auto_version('css/online-reservation.css')
+                // );
 
-                $data['js_files'] = array(
-                    base_url().'js/moment.min.js',
-                    base_url().auto_version('js/online-reservation.js'),
-                );
+                // $data['js_files'] = array(
+                    // base_url().'js/moment.min.js',
+                    // base_url().auto_version('js/online-reservation.js'),
+                // );
 
 
                 // generate PayPal data for the reservation_success page
