@@ -860,28 +860,23 @@ $(document).on('click', '.qty_minus', function() {
         console.log(extraCharges);
     }
 });
-var form = $("#guest-information-form");
+
 $("#booking_engine_form").click(function() {
-    $("#nexio_active").val("1");
-    $.ajax({
-        type: "POST",
-        url: form.attr("action"),
-        dataType: 'JSON',
-        data: $("#guest-information-form").serialize(), //only input
-        success: function(response) {
-            console.log(response);
-            if (response.customer_id != null) {
-                var event = new CustomEvent('post.submit_user', { 'detail': { "customer_id": response.customer_id } });
-                document.dispatchEvent(event);
-                setTimeout(function() {
-                    window.location = getBaseURL() + response.url;
-                }, 3000);
-            } else if (response.status == 'error') {
-                alert(response.message);
-                setTimeout(function() {
-                    location.reload();
-                }, 1000);
-            }
+    var check = false;
+    var fields = $("#guest-information-form")
+        .find("input")
+        .filter('[required]:visible')
+        .serializeArray();
+    $.each(fields, function(i, field) {
+        if (!field.value) {
+            alert(field.name + " is required");
+        } else {
+            check = true;
         }
     });
+    if (check) {
+        var event = new CustomEvent('post.submit_user');
+        document.dispatchEvent(event);
+    }
+
 });
