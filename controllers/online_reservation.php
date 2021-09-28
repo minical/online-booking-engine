@@ -1132,7 +1132,7 @@ class Online_reservation extends MY_Controller
                     );
                     $card_response = array();
 
-                    if($card_data_array && $card_data_array['card']['card_number'] && $gateway_settings['selected_payment_gateway'] == 'nexio') {
+                    if($card_data_array && $card_data_array['card']['card_number']) {
 
                         $customer_data['customer_id'] = $customer_id;
                         $card_data_array['customer_data'] = $customer_data;
