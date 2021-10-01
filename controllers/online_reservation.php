@@ -1086,8 +1086,19 @@ class Online_reservation extends MY_Controller
 
                 if ($customer_id = $this->Customer_model->get_customer_id_by_email($customer_data['email'], $company_id)) {
                     $this->Customer_model->update_customer($customer_id, $customer_data);
+
+                    $post_customer_data = $customer_data;
+                    $post_customer_data['customer_id'] = $customer_id;
+
+                    do_action('post.update.customer', $post_customer_data);
+
                 } else {
                     $customer_id = $this->Customer_model->create_customer($customer_data);
+
+                    $post_customer_data = $customer_data;
+                    $post_customer_data['customer_id'] = $customer_id;
+
+                    do_action('post.create.customer', $post_customer_data);
                 }
 
                 // $token = sqli_clean($this->security->xss_clean($this->input->post('token')));
@@ -1167,6 +1178,12 @@ class Online_reservation extends MY_Controller
         
                 if(empty($check_data)){
                     $this->Customer_model->update_customer($customer_id, $customer_data);
+
+                    $post_customer_data = $customer_data;
+                    $post_customer_data['customer_id'] = $customer_id;
+
+                    do_action('post.update.customer', $post_customer_data);
+                    
                     if(isset($cc_number)){
                         $this->Card_model->create_customer_card_info($card_details);
                     }
@@ -1240,6 +1257,11 @@ class Online_reservation extends MY_Controller
                     }
 
                     $booking_id = $this->Booking_model->create_booking($booking_data);
+
+                    $post_booking_data = $booking_data;
+                    $post_booking_data['booking_id'] = $booking_id;
+
+                    do_action('post.create.booking', $post_booking_data);
 
                     $booking_data['rate']    = number_format($rate_plan['average_daily_rate'], 2, ".", ",");
                     
@@ -1385,31 +1407,32 @@ class Online_reservation extends MY_Controller
                     //Create a corresponding invoice
                     $this->Invoice_model->create_invoice($booking_id);
 
-                    // try {
-                    //     // add booking info into CM DB
-                    //     $request_data = $_REQUEST;
-                    //     $request_data['adult-count'] = $data['view_data']['adult_count'];
-                    //     $request_data['children-count'] = $data['view_data']['children_count'];
-                    //     $request_data['rate'] = $rate_plan['average_daily_rate'];
-                    //     $request_data['total'] = $data['view_data']['total'];
-                    //     $request_data['number-of-nights'] = $data['view_data']['number_of_nights'];
+                    try {
+                        // add booking info into xml logs
+                        $request_data['booking_data'] = $booking_data;
+                        $request_data['booking_block_data'] = $booking_history;
+                        $request_data['card_data'] = $card_data_array;
 
-                    //     $log_data = http_build_query(
-                    //         array(
-                    //             'check_in_date' => $booking_history['check_in_date'],
-                    //             'check_out_date' => $booking_history['check_out_date'],
-                    //             'booking_id' => $booking_history['booking_id'],
-                    //             'log' => json_encode($request_data),
-                    //         )
-                    //     );
+                        $request_data['total'] = $data['view_data']['total'];
+                        $request_data['number-of-nights'] = $data['view_data']['number_of_nights'];
 
-                    //     $req = Requests::post(
-                    //         $this->config->item('cm_url') . '/sync/add_booking_engine_logs/', array(
-                    //         'X-API-KEY' => $this->config->item('api_key')
-                    //     ), $log_data);
-                    // } catch (Exception $e) {
+                        // date_default_timezone_set('America/Denver');
+                        $response = array(
+                            'ota_type' => 'booking_engine',
+                            'ota_booking_id' => $booking_id,
+                            'pms_booking_id' => $booking_id,
+                            'check_in_date' => $booking_history['check_in_date'],
+                            'check_out_date' => $booking_history['check_out_date'],
+                            'create_date_time' => date('Y-m-d H:i:s', time()),
+                            'booking_type' => 'new',
+                            'xml_out' => json_encode($request_data)
+                        );
 
-                    // }
+                        $this->Booking_model->insert_ota_booking($response);
+                        
+                    } catch (Exception $e) {
+
+                    }
                 }
 
                 $room_type = $this->Room_type_model->get_room_type_by_room_id($booking_history['room_id']);
