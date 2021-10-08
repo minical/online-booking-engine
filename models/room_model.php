@@ -421,7 +421,7 @@ class Room_model extends CI_Model {
 					FROM booking as b, booking_block as brh
 					WHERE
 					(
-						brh.check_out_date > '$check_in_date' AND '$check_out_date' > brh.check_in_date
+						DATE(brh.check_out_date) > '$check_in_date' AND '$check_out_date' > DATE(brh.check_in_date)
 					) AND #include currently selected room in the available room list
 					b.booking_id = brh.booking_id AND
 					b.booking_id != '$booking_id' AND
