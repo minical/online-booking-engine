@@ -2761,4 +2761,13 @@ class Booking_model extends CI_Model {
         }
         return $booking_fields;
     }
+
+    function insert_ota_booking($booking)
+    {     
+        $this->db->insert('ota_bookings', $booking);
+        if ($this->db->_error_message())
+        {
+            show_error($this->db->_error_message());
+        }
+    }
 }
