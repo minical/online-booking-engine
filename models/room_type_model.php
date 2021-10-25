@@ -403,40 +403,51 @@ class Room_type_model extends CI_Model {
 		}
 	}
         
-        function get_bookings($company_id = NULL, $start_date = NULL , $end_date = NULL, $depositType = NULL)
+    function get_bookings($company_id = NULL, $start_date = NULL , $end_date = NULL, $depositType = NULL)
+    {
+        $amount_condition = "";
+        if($depositType == '1')
         {
-            $amount_condition = "";
-            if($depositType == '1')
-            {
-                $amount_condition = " AND p.amount > 0";
-            }
-            else if($depositType == '2')
-            {
-                $amount_condition = " AND p.amount IS NULL";
-            }
-            
-            $query = "SELECT *, p.date_time as deposit_date
-                FROM booking_block as brh 
-                LEFT JOIN booking as b ON (brh.booking_id = b.booking_id)
-                LEFT JOIN customer as c ON (c.customer_id = b.booking_customer_id)
-                LEFT JOIN payment as p ON (b.booking_id = p.booking_id AND p.is_deleted != '1')
-                LEFT JOIN booking_log as bl ON (bl.booking_id = b.booking_id)
-                LEFT JOIN user_profiles as up ON (up.user_id = bl.user_id)
-                WHERE brh.check_in_date >= '$start_date' AND check_in_date <= '$end_date' AND b.company_id = '$company_id' AND b.is_deleted != '1' AND bl.log_type = '1' $amount_condition GROUP BY b.booking_id";            
-            
-            $q = $this->db->query($query);
-
-            // error checking
-            if ($this->db->_error_message()) {
-                show_error($this->db->_error_message());
-            }
-
-            if ($q->num_rows() > 0) {
-                $result = $q->result_array();
-                return $result;
-            }
-            return null;
-            
+            $amount_condition = " AND p.amount > 0";
         }
+        else if($depositType == '2')
+        {
+            $amount_condition = " AND p.amount IS NULL";
+        }
+        
+        $query = "SELECT *, p.date_time as deposit_date
+            FROM booking_block as brh 
+            LEFT JOIN booking as b ON (brh.booking_id = b.booking_id)
+            LEFT JOIN customer as c ON (c.customer_id = b.booking_customer_id)
+            LEFT JOIN payment as p ON (b.booking_id = p.booking_id AND p.is_deleted != '1')
+            LEFT JOIN booking_log as bl ON (bl.booking_id = b.booking_id)
+            LEFT JOIN user_profiles as up ON (up.user_id = bl.user_id)
+            WHERE brh.check_in_date >= '$start_date' AND check_in_date <= '$end_date' AND b.company_id = '$company_id' AND b.is_deleted != '1' AND bl.log_type = '1' $amount_condition GROUP BY b.booking_id";            
+        
+        $q = $this->db->query($query);
+
+        // error checking
+        if ($this->db->_error_message()) {
+            show_error($this->db->_error_message());
+        }
+
+        if ($q->num_rows() > 0) {
+            $result = $q->result_array();
+            return $result;
+        }
+        return null;
+        
+    }
+
+    function get_max_room_type_occupancy($company_id){
+        $this->db->select_max('max_occupancy');
+        $this->db->from('room_type');
+        $this->db->where('company_id', $company_id);
+        $this->db->limit(1);
+        $query = $this->db->get();
+        $r = $query->row_array();
+
+        return $r;
+    }
 		
 }

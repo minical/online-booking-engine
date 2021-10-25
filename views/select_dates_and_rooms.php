@@ -64,6 +64,10 @@
 							<option value="4" <?php echo set_select('adult_count', '4'); ?>>4 <?php echo l('Adults', true); ?></option>
 							<option value="5" <?php echo set_select('adult_count', '5'); ?>>5 <?php echo l('Adults', true); ?></option>
 							<option value="6" <?php echo set_select('adult_count', '6'); ?>>6 <?php echo l('Adults', true); ?></option>
+							<?php if($max_occupancy > 6){ 
+								for($i = 7; $i <= $max_occupancy; $i++) {?>
+								<option value="<?php echo $i; ?>" <?php echo set_select('adult_count', "<?php echo $i; ?>"); ?>><?php echo $i; ?> <?php echo l('Adults', true); ?></option>
+							<?php } } ?>
 						</select>
 					</div>
 
@@ -76,6 +80,10 @@
 							<option value="2" <?php echo set_select('children_count', '2'); ?>>2 <?php echo l('Children', true); ?></option>
 							<option value="3" <?php echo set_select('children_count', '3'); ?>>3 <?php echo l('Children', true); ?></option>
 							<option value="4" <?php echo set_select('children_count', '4'); ?>>4 <?php echo l('Children', true); ?></option>
+							<?php if($max_occupancy > 6){ 
+								for($i = 7; $i <= $max_occupancy; $i++) {?>
+								<option value="<?php echo $i; ?>" <?php echo set_select('children_count', "<?php echo $i; ?>"); ?>><?php echo $i; ?> <?php echo l('Children', true); ?></option>
+							<?php } } ?>
 						</select>
 					</div>	
 					<div class="col-sm-12 mr-t-20">

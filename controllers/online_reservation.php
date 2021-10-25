@@ -346,30 +346,14 @@ class Online_reservation extends MY_Controller
             unset($data['company_data']['invoice_email_header']);
             unset($data['company_data']['booking_confirmation_email_header']);
 
-            // $data['js_files'] = array(
-            //     base_url().auto_version('js/online_reservations/hotel-datepicker-3.6.5/js/fecha.min.js'),
-            //     base_url().auto_version('js/online_reservations/hotel-datepicker-3.6.5/js/hotel-datepicker.js'),
-            //     base_url().auto_version('js/online-reservation.js'),
-            //     base_url().auto_version('js/online_reservations/eye.js'),
-            //     base_url().auto_version('js/online_reservations/utils.js'),
-            //     base_url().'js/moment.min.js'
-            // );
+            $room_type_occupancy = $this->Room_type_model->get_max_room_type_occupancy($company_id);
 
-            // $data['css_files'] = array(
-            //     base_url().auto_version('css/online-reservation.css'),
-            //     base_url().auto_version('js/online_reservations/hotel-datepicker-3.6.5/css/hotel-datepicker.css')
-            // );
+            $data['max_occupancy'] = $room_type_occupancy['max_occupancy'];
 
             $data['current_step'] = 1;
-            // $data['main_content'] = 'online_reservation/select_dates_and_rooms';
             $data['selling_date'] = $company_data['selling_date'];
-            // $this->load->view('includes/online_reservation_template', $data);
-
-            // $files = get_asstes_files($this->module_assets_files, $this->module_name, $this->controller_name, $this->function_name);
-
             $data['main_content'] = '../extensions/'.$this->module_name.'/views/select_dates_and_rooms';
-
-                $this->template->load('online_reservation_template', null , $data['main_content'], $data);
+            $this->template->load('online_reservation_template', null , $data['main_content'], $data);
         }
     }
 
