@@ -164,10 +164,10 @@ class Online_reservation extends MY_Controller
 
             // TODO: make the ota ID dynamic
             $channel_key = 'obe';
-            $channel = apply_filters('get_ota_id', 'obe');
-            $channel = $channel ? $channel : SOURCE_ONLINE_WIDGET;
+            $ota_id = apply_filters('get_ota_id', 'obe');
+            $ota_id = $ota_id ? $ota_id : SOURCE_ONLINE_WIDGET;
 
-            $available_room_types = $this->Room_type_model->get_room_type_availability($company_id, $channel, $check_in_date, $check_out_date, $adult_count, $children_count, null, $channel_key);
+            $available_room_types = $this->Room_type_model->get_room_type_availability($company_id, $ota_id, $check_in_date, $check_out_date, $adult_count, $children_count, null, $channel_key);
 
             $total_availability   = 0;
             $available_rate_plans = array();
@@ -1208,6 +1208,9 @@ class Online_reservation extends MY_Controller
                 //Create Booking(s)
                 $bookings = array();
 
+                $ota_id = apply_filters('get_ota_id', 'obe');
+                $ota_id = $ota_id ? $ota_id : SOURCE_ONLINE_WIDGET;
+
                 $booking_source = isset($this->session->userdata['view_data']['booking_source']) ? $this->session->userdata['view_data']['booking_source'] : "";
                 foreach ($selected_rooms as $selected_room_index => $selected_room) {
                     $booking_data['rate_plan_id']  = $data['view_data']['rate_plan_selected_ids'][$selected_room_index];
@@ -1219,7 +1222,7 @@ class Online_reservation extends MY_Controller
                     $booking_data['children_count'] = $data['view_data']['children_count'][$selected_room_index];
 
                     $booking_data['state']               = ($company_data['booking_engine_booking_status']) ? RESERVATION : UNCONFIRMED_RESERVATION;
-                    $booking_data['source']              = ($booking_source && $booking_source == 'seasonal.io') ? SOURCE_SEASONAL : SOURCE_ONLINE_WIDGET;
+                    $booking_data['source']              = $ota_id;
                     $booking_data['company_id']          = $company_id;
                     $booking_data['booking_customer_id'] = $customer_id;
                     $booking_data['booking_notes']       = sqli_clean($this->security->xss_clean($this->input->post('special-requests')));
