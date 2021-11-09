@@ -162,7 +162,12 @@ class Online_reservation extends MY_Controller
 
             $number_of_rooms_requested = sqli_clean($this->security->xss_clean($this->input->post('number-of-rooms', TRUE)));
 
-            $available_room_types = $this->Room_type_model->get_room_type_availability($company_id, SOURCE_ONLINE_WIDGET, $check_in_date, $check_out_date, $adult_count, $children_count);
+            // TODO: make the ota ID dynamic
+            $channel_key = 'obe';
+            $channel = apply_filters('get_ota_id', 'obe');
+            $channel = $channel ? $channel : SOURCE_ONLINE_WIDGET;
+
+            $available_room_types = $this->Room_type_model->get_room_type_availability($company_id, $channel, $check_in_date, $check_out_date, $adult_count, $children_count, null, $channel_key);
 
             $total_availability   = 0;
             $available_rate_plans = array();
