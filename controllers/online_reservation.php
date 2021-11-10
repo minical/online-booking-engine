@@ -167,7 +167,7 @@ class Online_reservation extends MY_Controller
             $ota_id = apply_filters('get_ota_id', 'obe');
             $ota_id = $ota_id ? $ota_id : SOURCE_ONLINE_WIDGET;
 
-            $available_room_types = $this->Room_type_model->get_room_type_availability($company_id, $ota_id, $check_in_date, $check_out_date, $adult_count, $children_count, null, $channel_key);
+            $available_room_types = $this->Room_type_model->get_room_type_availability($company_id, $ota_id, $check_in_date, $check_out_date, $adult_count, $children_count, true, null, true, true, true, true, null, $channel_key);
 
             $total_availability   = 0;
             $available_rate_plans = array();
@@ -385,7 +385,7 @@ class Online_reservation extends MY_Controller
         $ota_id = apply_filters('get_ota_id', 'obe');
         $ota_id = $ota_id ? $ota_id : SOURCE_ONLINE_WIDGET;
 
-        $available_room_types = $this->Room_type_model->get_room_type_availability($company_id, $ota_id, $check_in_date, $check_out_date, $adult_count, $children_count, $company_access_key, 'obe');
+        $available_room_types = $this->Room_type_model->get_room_type_availability($company_id, $ota_id, $check_in_date, $check_out_date, $adult_count, $children_count, true, null, true, true, true, true, $company_access_key, 'obe');
 
         $total_availability   = 0;
         $available_rate_plans = $rooms_available = $unavailable_room_types = array();
