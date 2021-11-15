@@ -728,7 +728,7 @@ function fetchRoomTypeAvailability(evt, callback, btnType) {
         data: {
             start_date: first_date,
             end_date: last_date,
-            channel: 1,
+            channel_key: 'obe',
             company_id: $('input[name="company_id"]').val()
         },
         dataType: "json",
