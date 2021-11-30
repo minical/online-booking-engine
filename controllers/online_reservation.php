@@ -1208,8 +1208,8 @@ class Online_reservation extends MY_Controller
                 //Create Booking(s)
                 $bookings = array();
 
-                $ota_id = apply_filters('get_ota_id', 'obe');
-                $ota_id = $ota_id ? $ota_id : SOURCE_ONLINE_WIDGET;
+                // $ota_id = apply_filters('get_ota_id', 'obe');
+                // $ota_id = $ota_id ? $ota_id : SOURCE_ONLINE_WIDGET;
 
                 $booking_source = isset($this->session->userdata['view_data']['booking_source']) ? $this->session->userdata['view_data']['booking_source'] : "";
                 foreach ($selected_rooms as $selected_room_index => $selected_room) {
@@ -1222,7 +1222,7 @@ class Online_reservation extends MY_Controller
                     $booking_data['children_count'] = $data['view_data']['children_count'][$selected_room_index];
 
                     $booking_data['state']               = ($company_data['booking_engine_booking_status']) ? RESERVATION : UNCONFIRMED_RESERVATION;
-                    $booking_data['source']              = $ota_id;
+                    $booking_data['source']              = ($booking_source && $booking_source == 'seasonal.io') ? SOURCE_SEASONAL : SOURCE_ONLINE_WIDGET;
                     $booking_data['company_id']          = $company_id;
                     $booking_data['booking_customer_id'] = $customer_id;
                     $booking_data['booking_notes']       = sqli_clean($this->security->xss_clean($this->input->post('special-requests')));
