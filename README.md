@@ -12,7 +12,7 @@
 * [License](#license)
 
 ### Introduction
-This extension provides a customer-facing booking application that will automate booking creation. Comes with an embedable code that you can add to your existing website.
+This extension provides a customer-facing booking application that will automate booking creation. Comes with an embeddable code that you can add to your existing website.
  
 
 ### Installation
@@ -44,7 +44,7 @@ A MAJOR is very rare, it would only be considered if the source was effectively 
 
 A MINOR is when there are significant changes that affect core structures. This increment would likely break some 3rd party modules.
 
-A FEATURE version is when new extensions or features are added (such as a payment gateway, shipping module etc). Updating a feature version is at a low risk of breaking 3rd party modules.
+A FEATURE version is when new extensions or features are added (such as a payment gateway, shipping module, etc). Updating a feature version is at a low risk of breaking 3rd party modules.
 
 A PATCH version is when a fix is added, it should be considered safe to update patch versions e.g 1.2.3.4 to 1.2.3.5
 
