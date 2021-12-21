@@ -1037,7 +1037,7 @@ class Online_reservation extends MY_Controller
 
         $nexio_active = sqli_clean($this->security->xss_clean($this->input->post('nexio_active')));
 
-        if ($this->form_validation->run() == FALSE && $nexio_active == 0) {           
+        if ($this->form_validation->run() == FALSE && $nexio_active == 0) {         
             $data['main_content'] = '../extensions/'.$this->module_name.'/views/book_reservation';
             $this->template->load('online_reservation_template', null , $data['main_content'], $data);
 
@@ -1254,8 +1254,7 @@ class Online_reservation extends MY_Controller
 
                     $post_booking_data = $booking_data;
                     $post_booking_data['booking_id'] = $booking_id;
-
-                    do_action('post.create.booking', $post_booking_data);
+                   
 
                     $booking_data['rate']    = number_format($rate_plan['average_daily_rate'], 2, ".", ",");
                     
@@ -1279,6 +1278,12 @@ class Online_reservation extends MY_Controller
                         'booking_from'=>"Booking Engine"
 
                     );
+
+                    $post_booking_data['room_id'] = $selected_room['room_id'];
+                    $post_booking_data['check_in_date'] = $company_data['enable_new_calendar'] ? $data['view_data']['check_in_date'].' '.date("H:i:s", strtotime($company_data['default_checkin_time'])) : $data['view_data']['check_in_date'];
+                    $post_booking_data['check_out_date'] = $company_data['enable_new_calendar'] ? $data['view_data']['check_out_date'].' '.date("H:i:s", strtotime($company_data['default_checkout_time'])) : $data['view_data']['check_out_date'];
+
+                    do_action('post.create.booking', $post_booking_data);
 
                      do_action('post.add.booking', $booking_action_data);
 
