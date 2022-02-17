@@ -1180,33 +1180,6 @@ class Online_reservation extends MY_Controller
                     }
                 }
 
-//                Stripe tokenization lines commented below
-                // if ($token) {
-
-                //     $card_details = array(
-                //         'is_primary' => 1,
-                //         'customer_id' => $customer_id,
-                //         'customer_name' => $customer_data['customer_name'],
-                //         'card_name' => '',
-                //         'company_id' => $customer_data['company_id'],
-                //         'cc_number' => sqli_clean($this->security->xss_clean($this->input->post('masked_card_number'))),
-                //         'cc_expiry_month' => sqli_clean($this->security->xss_clean($this->input->post('cc_expiry_month'))),
-                //         'cc_expiry_year' => sqli_clean($this->security->xss_clean($this->input->post('cc_expiry_year'))),
-                //         'cc_tokenex_token' => $token,
-                //         'cc_cvc_encrypted' => sqli_clean($this->security->xss_clean($this->input->post('cc_cvc_encrypted')))
-                //     );
-
-                //     $is_card = $this->Card_model->get_customer_cards($customer_id);
-                //     if($is_card){
-                //         if($is_card > 0) {
-                //             $this->Card_model->update_customer_primary_card($customer_id, $card_details);
-                //         }
-                //     }else{
-                //         $this->Card_model->create_customer_card_info($card_details);
-                //     }
-                //     $this->Customer_model->update_customer($customer_id, $customer_data);
-                // }
-
                 //Create Booking(s)
                 $bookings = array();
 

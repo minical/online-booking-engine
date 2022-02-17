@@ -354,9 +354,7 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                         <input type="hidden" name="are_gateway_credentials_filled" id="are_gateway_credentials_filled" value="<?php echo $are_gateway_credentials_filled; ?>">
 
                     <?php if ($store_cc_in_booking_engine and $are_gateway_credentials_filled): ?>
-                        <!-- <script>
-                            var stripe_publishable_key = "<?php echo isset($gateway_credentials['stripe_publishable_key']) ? $gateway_credentials['stripe_publishable_key'] : '';?>";
-                        </script> -->
+                        
                         <div class="form-group cc_details">
                             <label for="birthday" class=" col-md-3 control-label"><?php echo l('Credit card'); ?>
                                 <span style="color:red;">*</span>
