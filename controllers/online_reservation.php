@@ -1054,7 +1054,8 @@ class Online_reservation extends MY_Controller
             //while going through the online reservation process.
             if (!is_null($selected_rooms)) {
 
-
+                $card_data_array = array();
+                
                 $customer_data                  = array();
                 $customer_data['company_id']    = $company_id;
                 $customer_data['customer_name'] = sqli_clean($this->security->xss_clean($this->input->post('customer-name')));
