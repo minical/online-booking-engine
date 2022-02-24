@@ -104,7 +104,7 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
 
     <div class="col-md-4">
         <div class="page-header h3">
-            <?php echo l('Booking Information'); ?>
+            <span class="m-052"><?php echo l('Booking Information'); ?></span>
             <a href="<?php echo base_url().'online_reservation/select_dates_and_rooms/'.$this->uri->segment(3); ?>"
                class="btn btn-default btn-sm pull-right">
                 <?php echo l('Start Over'); ?>
@@ -233,7 +233,7 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
             <dt>
                 <?php echo l('Total Charge'); ?>:
             </dt>
-            <dd class="text-right text-muted">
+            <dd class="text-right text-muted m-060">
                 <?php echo number_format($view_data['sub_total'], 2, ".", ","); ?>
             </dd>
 
@@ -241,7 +241,7 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                 <dt>
                     <?php echo l('Tax'); ?>:
                 </dt>
-                <dd class="text-right text-muted">
+                <dd class="text-right text-muted m-060">
                     <?php echo number_format($view_data['tax_amount'], 2, ".", ","); ?>
                 </dd>
             <?php endif; ?>
@@ -249,7 +249,7 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
             <dt>
                 <?php echo l('Total'); ?>:
             </dt>
-            <dd class="text-right text-muted">
+            <dd class="text-right text-muted m-060">
                 <?php echo number_format($view_data['total'], 2, ".", ","); ?>
             </dd>
         </dl>

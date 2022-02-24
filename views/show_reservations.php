@@ -10,7 +10,7 @@
 	<div class="col-md-4" style="background: white;box-shadow: 0px 0px 3px rgba(200, 206, 210, 0.5);">
 		<div class="page-header">
 			<h3>
-				<?php echo l('Booking Information'); ?>
+				<span class="m-052"><?php echo l('Booking Information'); ?></span>
 				<a href="<?php echo base_url() . 'online_reservation/select_dates_and_rooms/'.$this->uri->segment(3); ?>"
 					class="btn btn-default btn-sm pull-right" />
 					<?php echo l('Start Over'); ?>
@@ -19,7 +19,7 @@
 
 		</div>
 
-		<dl class="dl-horizontal">
+		<dl class="dl-horizontal m-057">
 			<dt>
 				<?php echo l('check_in_date'); ?>:
 			</dt>
@@ -94,7 +94,7 @@
 					$is_rooms_available = true;
                 ?>                
 				<div class="panel-rate-plan-listing panel panel-<?php echo $is_room_type_unavailable ? 'default' : 'success' ?>	">
-					<div class="panel-body" style="padding-bottom: 0;padding-right: 0;">
+					<div class="panel-body m-051" style="padding-bottom: 0;padding-right: 0;">
 						<form action="<?php echo base_url() . 'online_reservation/show_reservations/'.$this->uri->segment(3).''; ?>" method="post">
 							
 							<!-- keeps the original check-in, check-out date, and # of rooms populated between pages-->
@@ -130,7 +130,7 @@
 															else 
 																echo "col-md-4 hidden-xs"; 
 														?> thumbnail"  data-lightbox="<?php echo $rate_plan_id; ?>" >
-													<img src="<?php echo $this->image_url . $company_data['company_id']."/".$image['filename']; ?>" />
+													<img src="<?php echo $this->image_url . $company_data['company_id']."/".$image['filename']; ?>"  class="m-059"/>
 												</a>
 										
 								<?php
@@ -163,7 +163,7 @@
                                     <br/>
                                 </div>
                                 <div class="col-md-5" style="padding: 0;">
-                                    <div class="text-right" style="margin-bottom: 25px;padding: 0 20px;">
+                                    <div class="text-right m-060" style="margin-bottom: 25px;padding: 0 20px;">
                                         <?php
                                         $average_daily_rate = $rate_plan['average_daily_rate'];
                                         if ($company_data['allow_free_bookings'] && $average_daily_rate == 0){
@@ -260,7 +260,7 @@
                                 }
                                 ?>
                             </div>
-                            <input type="submit" name="submit" value="<?php echo l('Book', 1); ?>" class="btn btn-<?= $is_room_bookable ? 'primary' : 'default';?> btn-lg" <?=$is_room_bookable ? '' : 'disabled';?> style="width: 200px;float: right; border-radius: 0; padding: 7px;" />
+                            <input type="submit" name="submit" value="<?php echo l('Book', 1); ?>" class="btn btn-<?= $is_room_bookable ? 'primary' : 'default';?> btn-lg m-053" <?=$is_room_bookable ? '' : 'disabled';?> style="width: 200px;float: right; border-radius: 0; padding: 7px;" />
                         </form>
 					</div>
 				</div>
