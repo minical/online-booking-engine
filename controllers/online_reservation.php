@@ -172,28 +172,34 @@ class Online_reservation extends MY_Controller
             $available_room_types = $this->Room_type_model->get_room_type_availability($company_id, $ota_id, $check_in_date, $check_out_date, $adult_count, $children_count, true, null, true, true, true, true, $company_access_key, 'obe');
 
             $total_availability   = 0;
-            $available_rate_plans = array();
+            $available_rate_plans = $rooms_available = $unavailable_room_types = array();
+                // prx($available_room_types);
             foreach ($available_room_types as $key => $available_room_type) {
-
                 unset($available_room_types[$key]['description']);
                 unset($available_room_type['description']);
 
-                //$room_type_images = $this->Image_model->get_images($available_room_type['image_group_id']);
-
-                // check if there's enough room for the date range for the requested number of rooms.
-                // if not, then continue to next room type
                 $minimum_avaialbility_of_current_room_type = 999;
-                foreach ($available_room_type['availability'] as $availability)
-                {
-                    if (
-                        ($minimum_avaialbility_of_current_room_type > $availability['availability']) &&
-                        ($availability['date_start'] != $availability['date_end']))
+                if (isset($available_room_type['availability']) && $available_room_type['availability'] && count($available_room_type['availability']) > 0) {
+                    foreach ($available_room_type['availability'] as $availability)
                     {
-                        $minimum_avaialbility_of_current_room_type = $availability['availability'];
+                        if (
+                            ($minimum_avaialbility_of_current_room_type > $availability['availability']) &&
+                            ($availability['date_start'] != $availability['date_end'])
+                        )
+                        {
+                            $minimum_avaialbility_of_current_room_type = $availability['availability'];
+                        }
                     }
+                } else {
+                    $minimum_avaialbility_of_current_room_type = 0;
                 }
+
+                $number_of_rooms_requested = 1;
                 if ($minimum_avaialbility_of_current_room_type < $number_of_rooms_requested)
-                    continue;
+                {
+                    // continue;
+                    $unavailable_room_types[] = array ('id' => $available_room_type['id']);
+                }
 
                 $rate_plans = $this->Rate_plan_model->get_rate_plans_by_room_type_id($available_room_type['id']);
 
@@ -202,83 +208,68 @@ class Online_reservation extends MY_Controller
                     foreach ($rate_plans as $rate_plan) {
                         if ($rate_plan['is_shown_in_online_booking_engine'] == '1')
                         {
+
                             $rates = $this->Rate_model->get_daily_rates($rate_plan['rate_plan_id'], $check_in_date, $check_out_date);
 
-                            /* RESTRICTION CHECKS */
-                            // check if this rate plan can be sold online for all date ranges in effect.
                             $passed_all_restrictions = true;
 
                             foreach ($rates as $rate) {
                                 if ($rate['can_be_sold_online'] != '1') {
-                                    //echo "DEBUG: rate couldn't be sold online<br/>\n";
                                     $passed_all_restrictions = false;
                                 }
 
                                 if ($rate['minimum_length_of_stay'] > $length_of_stay && isset($rate['minimum_length_of_stay'])) {
-                                    //echo $rate_plan['rate_plan_id']."DEBUG: minimum_length_of_stay is greater than length_of_stay<br/>\n";
-                                    $passed_all_restrictions = false;
+                                    $rate_plan['min_length']="This room requires minimum ".$rate['minimum_length_of_stay']." nights of stay";
                                 }
 
                                 if ($rate['maximum_length_of_stay'] < $length_of_stay && isset($rate['maximum_length_of_stay'])) {
-                                    //echo $rate_plan['rate_plan_id']."DEBUG: maximum_length_of_stay is less than length_of_stay<br/>\n";
-                                    $passed_all_restrictions = false;
+                                    $rate_plan['max_length']="This room requires maximum ".$rate['maximum_length_of_stay']." nights of stay";
                                 }
 
                                 if (
                                     $rate['date'] == $check_in_date &&
-                                    //(
-                                    //    $rate['minimum_length_of_stay_arrival'] > $length_of_stay ||
                                     $rate['closed_to_arrival'] == '1'
-                                    //) && isset($rate['minimum_length_of_stay_arrival'])
                                 ) {
-                                    //echo $rate_plan['rate_plan_id']."DEBUG: minimum_length_of_stay_arrival is greater than length_of_stay<br/>\n";
-                                    $passed_all_restrictions = false;
+                                    $rate_plan['arrival']="please enable close to arrival on selected date";
                                 }
+                            }
 
+                            $checkout_date = date('Y-m-d', strtotime($check_out_date . " + 1 day"));
+
+                            $rates = $this->Rate_model->get_daily_rates($rate_plan['rate_plan_id'], $check_in_date, $checkout_date);
+
+                            foreach ($rates as $rate) {
                                 if (
                                     $rate['date'] == $check_out_date &&
-                                    //(
-                                    //    $rate['minimum_length_of_stay_arrival'] > $length_of_stay ||
                                     $rate['closed_to_departure'] == '1'
-                                    //) && isset($rate['minimum_length_of_stay_arrival'])
                                 ) {
-                                    //echo $rate_plan['rate_plan_id']."DEBUG: minimum_length_of_stay_arrival is greater than length_of_stay<br/>\n";
-                                    $passed_all_restrictions = false;
+                                    $rate_plan['departure']="please enable close to departure on selected date";
                                 }
                             }
 
                             if ($passed_all_restrictions) {
-                                //$rate_plan_images       = $this->Image_model->get_images($rate_plan['image_group_id']);
-
-                                //$rate_plan['images']    = array_merge($rate_plan_images, $room_type_images);
-                                //$rate_plan['images']    = $room_type_images;
                                 $rate_plan['room_type_image_group_id']    = $available_room_type['image_group_id'];
 
                                 unset($rate_plan['description']);
 
+                                $rate_plan['max_adults'] = $available_room_type['max_adults'];
                                 $available_rate_plans[] = $rate_plan;
                             }
                         }
-
                     }
                 }
-
             }
-            $data['view_data']['check_in_date']             = $check_in_date;
-            $data['view_data']['check_out_date']            = $check_out_date;
-            $data['view_data']['number_of_rooms_requested'] = $number_of_rooms_requested;
-            $data['view_data']['adult_count']               = $adult_count;
-            $data['view_data']['children_count']            = $children_count;
 
-            //sort room_types_available (Again, this is done manually, because the above foreach makes sorting inconsistent)
             ksort($available_rate_plans);
-            $data['view_data']['available_rate_plans'] = $available_rate_plans;
             $date_start     = $check_in_date;
             $date_end       = $check_out_date;
             //Calculate default rates
-            $is_available_rate_plan = false;
+            $is_available_rate_plan = $is_available_room = false;
+            $best_available_rate = -1;
 
-            // fetch rate plan
+            $rate_plan_ids = array();
+            // fetch rate plan description $rate_plan_ids
+
             foreach ($available_rate_plans as $key => $rate_plan) {
 
                 $this->load->library('rate');
@@ -291,15 +282,55 @@ class Online_reservation extends MY_Controller
                 );
 
                 $average_daily_rate = $this->rate->get_average_daily_rate($rate_array);
-
+                $available_rate_plans[$key]['average_daily_rate'] = $average_daily_rate;
+                if ($best_available_rate == -1 || $average_daily_rate < $best_available_rate) {
+                    $best_available_rate = $average_daily_rate;
+                }
+                $rate_plan_ids[] = $rate_plan['rate_plan_id'];
                 if($average_daily_rate > 0 || ($company_data['allow_free_bookings'] && (!$rate_plan['charge_type_id'] || $rate_plan['charge_type_id'] == '0')))
                 {
                     $is_available_rate_plan = true;
                 }
+
+                if($this->Room_model->get_available_rooms(
+                    $check_in_date,
+                    $check_out_date,
+                    $rate_plan['room_type_id'],
+                    null,
+                    $company_id,
+                    1
+                ))
+                {
+                    $is_available_room = true;
+                }
+            }
+
+            $data['view_data']['best_available_rate'] = number_format($best_available_rate, 2, ".", ",");
+
+            $data['view_data']['default_currency'] = $this->Currency_model->get_default_currency($company_id);
+
+            $data['view_data']['check_in_date']             = $check_in_date;
+            $data['view_data']['check_out_date']            = $check_out_date;
+            $data['view_data']['adult_count']               = $adult_count;
+            $data['view_data']['children_count']            = $children_count;
+            $data['view_data']['available_rate_plans']      = $available_rate_plans;
+
+            $data['view_data']['unavailable_room_types']    = $unavailable_room_types;
+
+
+            if (isset($_GET['dev_mode'])) {
+                echo l('session set_userdata: <pre>',true);print_r($data);
             }
 
             $data['view_data']['booking_source'] = $origin;
             $this->session->set_userdata($data);
+
+            if (isset($_GET['dev_mode'])) {
+
+                $session_data = $this->session->all_userdata();
+
+                echo l('Data is all set. get session all_userdata: <pre>',true);print_r($session_data);
+            }
 
             $data['company_data'] = $company_data;
 
@@ -309,8 +340,19 @@ class Online_reservation extends MY_Controller
             unset($data['company_data']['invoice_email_header']);
             unset($data['company_data']['booking_confirmation_email_header']);
 
+            $descriptions = $this->Rate_plan_model->get_rate_plan_descriptions($rate_plan_ids);
+            foreach($data['view_data']['available_rate_plans'] as $key => $rate_plan)
+            {
+                $data['view_data']['available_rate_plans'][$key]['description'] = isset($descriptions[$rate_plan['rate_plan_id']]) ? $descriptions[$rate_plan['rate_plan_id']] : "";
+            }
 
-            if(isset($is_available_rate_plan) && $is_available_rate_plan)
+            foreach($data['view_data']['available_rate_plans'] as $key => $rate_plan)
+            {
+                $room_type_images = $this->Image_model->get_images($rate_plan['room_type_image_group_id']);
+                $data['view_data']['available_rate_plans'][$key]['images']    = $room_type_images;
+            }
+
+            if($is_available_rate_plan && $is_available_room)
             {
                 redirect('/online_reservation/show_reservations/'.$this->uri->segment(3));
             }
@@ -1055,7 +1097,7 @@ class Online_reservation extends MY_Controller
             if (!is_null($selected_rooms)) {
 
                 $card_data_array = array();
-                
+
                 $customer_data                  = array();
                 $customer_data['company_id']    = $company_id;
                 $customer_data['customer_name'] = sqli_clean($this->security->xss_clean($this->input->post('customer-name')));
