@@ -1221,6 +1221,8 @@ class Online_reservation extends MY_Controller
                     if(isset($cc_number)){
                         $this->Card_model->create_customer_card_info($card_details);
                     }
+                } else {
+                    $this->Card_model->update_customer_card($check_data['id'], $customer_id, $card_details);
                 }
 
                 //Create Booking(s)
