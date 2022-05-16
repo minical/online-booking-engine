@@ -23,6 +23,7 @@
 		>
             <input name="company_id" value="<?php echo $this->uri->segment(3); ?>" hidden="hidden" />
 			<input name="number-of-rooms" value="1" hidden="hidden" />
+			<input name="companyDateFormat" id="companyDateFormat" value="<?php echo $company_data['date_format']; ?>" type="hidden" />
 			<!--
 			<label for="number-of-rooms"># of Rooms</label>
 			<select name="number-of-rooms">

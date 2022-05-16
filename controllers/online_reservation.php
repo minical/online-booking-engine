@@ -25,6 +25,7 @@ class Online_reservation extends MY_Controller
         
         $this->load->library('PHPRequests');
         $this->load->library('email_template');
+        $this->load->helper('date_format_helper');
         
         $this->load->helper('url');
         $this->ci->load->helper('language_translation_helper');
@@ -150,7 +151,7 @@ class Online_reservation extends MY_Controller
             'Children',
             'trim'
         );
-        
+
         $data['show_error'] = false;
 
         $http_origin = (isset($_SERVER['HTTP_ORIGIN']) && $_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';

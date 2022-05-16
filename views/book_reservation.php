@@ -117,14 +117,14 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                 <?php echo l('check_in_date'); ?>::
             </dt>
             <dd>
-                <?php echo $view_data['check_in_date']; ?>
+                <?php echo get_local_formatted_date($view_data['check_in_date']); ?>
             </dd>
 
             <dt>
                 <?php echo l('Check-out Date'); ?>:
             </dt>
             <dd>
-                <?php echo $view_data['check_out_date']; ?>
+                <?php echo get_local_formatted_date($view_data['check_out_date']); ?>
             </dd>
 
             <dt>

@@ -45,6 +45,12 @@ $config['js-files'] = array(
         "location" => array(
             "online_reservation/select_dates_and_rooms",
         ),
+    ),
+    array(
+        "file" => '../../../js/helpers.js',
+        "location" => array(
+            "online_reservation/select_dates_and_rooms",
+        ),
     ), 
     array(
         "file" => 'assets/js/moment.min.js',
