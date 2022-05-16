@@ -97,6 +97,16 @@ class Online_reservation extends MY_Controller
         if($data['whitelabel_detail'])
         {
             $this->session->set_userdata('white_label_information', $white_label_detail);
+        } else {
+
+            $partner_id = $company_data['partner_id'];
+
+            $condition = array('id' => $partner_id);
+            $white_label_detail = $this->Whitelabel_partner_model->get_partners($condition);
+            if($white_label_detail)
+            {
+                $this->session->set_userdata('white_label_information', $white_label_detail[0]);
+            }
         }
 
         $time_zone = $this->Company_model->get_time_zone($company_id);
@@ -139,11 +149,8 @@ class Online_reservation extends MY_Controller
             'children_count',
             'Children',
             'trim'
-        );/*
-        $this->form_validation->set_rules(
-                                    'promo-code',
-                                    'Promo Code',
-                                    'trim'); */
+        );
+        
         $data['show_error'] = false;
 
         $http_origin = (isset($_SERVER['HTTP_ORIGIN']) && $_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
@@ -359,26 +366,10 @@ class Online_reservation extends MY_Controller
             else
             {
                 $data['show_error'] = true;
-                // $data['js_files'] = array(
-                //     base_url().auto_version('js/online_reservations/hotel-datepicker-3.6.5/js/fecha.min.js'),
-                //     base_url().auto_version('js/online_reservations/hotel-datepicker-3.6.5/js/hotel-datepicker.js'),
-                //     base_url().auto_version('js/online-reservation.js'),
-                //     base_url().auto_version('js/online_reservations/eye.js'),
-                //     base_url().auto_version('js/online_reservations/utils.js'),
-                //     base_url().'js/moment.min.js'
-                // );
-
-                // $data['css_files'] = array(
-                //     base_url().auto_version('css/online-reservation.css'),
-                //     base_url().auto_version('js/online_reservations/hotel-datepicker-3.6.5/css/hotel-datepicker.css')
-                // );
-
                 $data['current_step'] = 1;
-                // $data['main_content'] = 'online_reservation/select_dates_and_rooms';
                 $data['selling_date'] = $company_data['selling_date'];
-                // $this->load->view('includes/online_reservation_template', $data);
 
-                  $files = get_asstes_files($this->module_assets_files, $this->module_name, $this->controller_name, $this->function_name);
+                $files = get_asstes_files($this->module_assets_files, $this->module_name, $this->controller_name, $this->function_name);
 
                 $data['main_content'] = '../extensions/'.$this->module_name.'/views/select_dates_and_rooms';
 
