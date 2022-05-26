@@ -24,14 +24,14 @@
 				<?php echo l('check_in_date'); ?>:
 			</dt>
 			<dd>
-				<?php echo get_local_formatted_date($view_data['check_in_date']); ?>
+				<?php echo get_local_formatted_date($view_data['check_in_date'], $company_data['date_format']); ?>
 			</dd>
 
 			<dt>
 				<?php echo l('Check-out Date'); ?>:
 			</dt>
 			<dd>
-				<?php echo get_local_formatted_date($view_data['check_out_date']); ?>
+				<?php echo get_local_formatted_date($view_data['check_out_date'], $company_data['date_format']); ?>
 			</dd>
 
 			<dt>
@@ -186,7 +186,15 @@
                                         <div style="font-weight: 500;margin: 15px 0px 10px;">
                                             <?php echo l('Product Items', true); ?>
                                         </div>
+
                                         <table id="extras-fields" class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Items</th>
+                                                    <th>Rate</th>
+                                                </tr>
+                                            </thead>
                                                 <?php
                                                 $extras = $rate_plan['extras'];
                                                 foreach($extras as $extra) : ?>
@@ -201,7 +209,7 @@
                                                         </td>
                                                         <td>
                                                             <div class="name-rate-div-<?php echo $extra['extra_id']; ?>">
-                                                                <span class="rate-span-<?php echo $extra['extra_id']; ?>"><?php echo $extra['rate']; ?></span>
+                                                                <span class="rate-span-<?php echo $extra['extra_id']; ?>"><?php echo number_format($extra['rate'], 2, ".", ","); ?></span>
                                                             </div>
                                                             <div class="hidden name-rate-div-<?php echo $extra['extra_id']; ?>">
                                                                 <span class="charging-scheme-span-<?php echo $extra['extra_id']; ?>"><?php echo $extra['charging_scheme']; ?></span>
