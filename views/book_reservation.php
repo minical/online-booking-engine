@@ -210,7 +210,7 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                                         <td><?php echo $extra['extra_name']; ?></td>
                                         <td style="float: right;"><?php echo $extra['amount']; ?></td>
                                         <td style="float: left;margin-left: 57px;">
-                                            <?php echo $new_array[$extra['extra_id']]; ?>
+                                            <?php echo $extra['quantity']; ?>
                                         </td>
                                     </tr>
                                     <?php $prev_extras[] = $extra['extra_id']; endif; endforeach; ?>

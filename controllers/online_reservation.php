@@ -701,7 +701,7 @@ class Online_reservation extends MY_Controller
         }
 
         $data['view_data']['rate_plan_extra'] = $this->input->post('rate_plan_extra');
-
+        
         //Runs this page again until the number of rooms selected == number of rooms requested
         //Information is stored in hidden inputs in the view page
         if (isset($data['view_data']['rate_plan_selected_ids'])) {
@@ -804,7 +804,7 @@ class Online_reservation extends MY_Controller
         $data['view_data']['sub_total']  = $sub_total;
         $data['view_data']['tax_amount'] = $tax_amount = ($sub_total * $total_tax_percentage * 0.01) + $total_flat_rate_tax;
         $data['view_data']['total']      = $data['view_data']['sub_total'] + $data['view_data']['tax_amount'];
-
+        
         $new_array = array();
 
         if($rate_plan_extra && count($rate_plan_extra) > 0){
@@ -824,6 +824,9 @@ class Online_reservation extends MY_Controller
         }
 
         $grand_extra_total = 0;
+        $extra_sub_total = 0;
+        $extra_tax_amount = 0;
+
         if($rate_plan_extra && count($rate_plan_extra) > 0){
             $get_amount_only = true;
             $extra_charges = 0;
@@ -832,7 +835,7 @@ class Online_reservation extends MY_Controller
                 $extra['start_date'] = $data['view_data']['check_in_date'];
                 $extra['end_date'] = $data['view_data']['check_out_date'];
                 $extra['rate'] = $extra['amount'];
-                $extra['quantity'] = $new_array[$extra['extra_id']];
+                $extra['quantity'] = $extra['quantity'];
                 
                 $current_selling_date = $this->Company_model->get_selling_date($company_id);
                 
@@ -864,18 +867,18 @@ class Online_reservation extends MY_Controller
                             {
                                 foreach($tax_rates as $tax){
                                     if(!$tax['is_tax_inclusive']){
-                                        $tax_total += ($extra['rate'] * $tax['tax_rate'] / 100);
+                                        $tax_total += ($extra['rate'] * $extra['quantity'] * $tax['tax_rate'] / 100);
                                     }
                                     
                                 }
                             }
-                            $extra_charges += ($extra['rate'] + $tax_total) * $extra['quantity'];
+                            $extra_charges += ($extra['rate']) * $extra['quantity'];
                         }
                         
-                        $data['view_data']['sub_total'] += $extra['rate'];
-                        $data['view_data']['tax_amount'] += $tax_total;
+                        $extra_sub_total += $extra['rate'];
+                        $extra_tax_amount += $tax_total;
                     }
-                    else
+                    else if($extra['charging_scheme'] == 'once_a_day' && $extra['extra_type'] == 'rental' && strtotime($date_start) < strtotime($date_end))
                     {
                         for ($date = $date_start; $date < $date_end; $date = Date("Y-m-d", strtotime("+1 day", strtotime($date))))
                         {
@@ -895,26 +898,55 @@ class Online_reservation extends MY_Controller
                                 {
                                     foreach ($tax_rates as $tax) {
                                         if (!$tax['is_tax_inclusive']) {
-                                            $tax_total += ($extra['rate'] * $tax['tax_rate'] / 100);
+                                            $tax_total += ($extra['rate'] * $extra['quantity'] * $tax['tax_rate'] / 100);
                                         }
                                     }
                                 }
-                                $extra_charges += ($extra['rate'] + $tax_total) * $extra['quantity'];
+                                $extra_charges += ($extra['rate']) * $extra['quantity'];
                             }
 
-                            $data['view_data']['sub_total'] += $extra['rate'];
-                            $data['view_data']['tax_amount'] += $tax_total;
+                            $extra_sub_total += $extra['rate'];
+                            $extra_tax_amount += $tax_total;
+                        }
+                    } else {
+                        
+                        for ($date = $date_start; $date <= $date_end; $date = Date("Y-m-d", strtotime("+1 day", strtotime($date))))
+                        {
+                            $extra_array[] = array(
+                                "amount"       => $extra['rate'] * $extra['quantity'],
+                                "selling_date" => $date,
+                                "pay_period" => DAILY,
+                                "description" => $extra['extra_name']." (quantity: ".$extra['quantity'].")",
+                                "charge_type_id" => $extra['charge_type_id'],
+                                "charge_type_name" => $extra['extra_name']
+                            );
+                            
+                            if($get_amount_only)
+                            {
+                                $tax_total = 0;
+                                if($tax_rates && count($tax_rates) > 0)
+                                {
+                                    foreach ($tax_rates as $tax) {
+                                        if (!$tax['is_tax_inclusive']) {
+                                            $tax_total += ($extra['rate'] * $extra['quantity'] * $tax['tax_rate'] / 100);
+                                        }
+                                    }
+                                }
+                                $extra_charges += ($extra['rate']) * $extra['quantity'];
+                            }
+
+                            $extra_sub_total += $extra['rate'];
+                            $extra_tax_amount += $tax_total;
                         }
                     }
                 }
             }
-
-            foreach ($rate_plan_extra as $key => $extra) {
-                $data['view_data']['total'] = $data['view_data']['sub_total'] + $data['view_data']['tax_amount'];
-                $grand_extra_total = $extra_charges;
-            }
         }
-        $data['view_data']['grand_total'] = $grand_extra_total;
+
+        $data['view_data']['grand_total'] = $grand_extra_total = $extra_charges;
+        $data['view_data']['sub_total'] += $grand_extra_total;
+        $data['view_data']['tax_amount'] += $extra_tax_amount;
+        $data['view_data']['total'] = $data['view_data']['sub_total'] + $data['view_data']['tax_amount'];
 
         $data['view_data']['rate_plan_extra'] = $rate_plan_extra;
 
@@ -1254,7 +1286,7 @@ class Online_reservation extends MY_Controller
 
                         foreach ($rate_plan_extra as $key => $extra) {
                             if(!in_array($extra['extra_id'], $prev_extras)) {
-                                $booking_data['booking_notes'] .= $extra['extra_name']." (Amount: ".$extra['amount'].", Qty: ".$new_array[$extra['extra_id']].")\n";
+                                $booking_data['booking_notes'] .= $extra['extra_name']." (Amount: ".$extra['amount'].", Qty: ".$extra['quantity'].")\n";
                                 $prev_extras[] = $extra['extra_id'];
                             }
                         }
@@ -1305,7 +1337,7 @@ class Online_reservation extends MY_Controller
                             $extra_data['extra_id'] = $extra['extra_id'];
                             $extra_data['start_date'] = $data['view_data']['check_in_date'];
                             $extra_data['end_date'] = $data['view_data']['check_out_date'];
-                            $extra_data['quantity'] = $new_array[$extra['extra_id']];
+                            $extra_data['quantity'] = $extra['quantity'];
 
                             if(!in_array($extra['extra_id'], $prev_extra_data)){
                                 $this->create_booking_extra_AJAX($booking_id, $extra_data, $selling_date);

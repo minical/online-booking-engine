@@ -797,8 +797,10 @@ $(document).on('click', '.extra-check', function() {
         extraRow['rate_plan_id'] = ratePlanID;
         extraRow['charging_scheme'] = extraChargeScheme;
         extraRow['extra_type'] = extraType;
+        extraRow['quantity'] = 1;
 
         $('.qty-div-' + extraID + '-' + ratePlanID).removeClass('hidden');
+        $('.head-qty').removeClass('hidden');
 
         extraCharges.push(extraRow);
     } else {
@@ -808,6 +810,7 @@ $(document).on('click', '.extra-check', function() {
             return e.extra_id != extraID;
         });
         $('.qty-div-' + extraID + '-' + ratePlanID).addClass('hidden');
+        $('.head-qty').addClass('hidden');
     }
 
     $('.rate_plan_extra').val(JSON.stringify(extraCharges));
@@ -836,7 +839,14 @@ $(document).on('click', '.qty_plus', function() {
     extraRow['charging_scheme'] = extraChargeScheme;
     extraRow['extra_type'] = extraType;
 
-    extraCharges.push(extraRow);
+    $.each(extraCharges, function(i, v){
+        if(v.extra_id == extraID){
+            extraCharges[i].quantity = parseInt(qty) + 1;
+        }
+    });
+
+
+    // extraCharges.push(extraRow);
     $('.rate_plan_extra').val(JSON.stringify(extraCharges));
     console.log(extraCharges);
 });

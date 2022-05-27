@@ -1,3 +1,59 @@
+<!-- Help Modal -->
+<div class="modal fade" id="help-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel"><?php echo l('About Products', true); ?></h4>
+      </div>
+      <div class="modal-body">
+        <p>
+            <?php echo l('Products are a great way to apply charges to invoices that are re-occuring or date sensitive.
+            For all other charges, we recommend adding them directly to the invoice.', true); ?>
+        </p>
+        <p>
+            <strong><?php echo l('Products have two types', true); ?></strong>: <?php echo l('items and rentals. They differ in the way they apply charges to invoices.', true); ?>
+        
+            <?php echo l('Rentals, such extra beds, are charged the same way rooms are charged -- by night.
+            They are charged based on the number of nights between the start and end date.
+            For example, if the start date is 2012-06-20 and the end date 2012-06-22, the invoice will be charged 2 times;
+            once when the selling date changes from 2012-06-20 to 2012-06-21 (for 2012-06-20),
+            and once when the selling date changes from 2012-06-21 to 2012-06-22 (for 2012-06-21).', true); ?>
+        
+            <?php echo l('Items, such as tickets and food, are charged by day.
+            They are charged based on the number of days that include the start and end date.
+            For example, if the start date is 2012-06-20 and the end date 2012-06-22, the invoice will be charged 3 times;
+            once when the selling date changes from 2012-06-20 to 2012-06-21 (for 2012-06-20),
+            once when the selling date changes from 2012-06-21 to 2012-06-22 (for 2012-06-21),
+            and once when the selling date changes from 2012-06-22 to 2012-06-23 (for 2012-06-22).
+            NOTE: If the booking check-out date and the extra end date are the same for an item, 
+            the charge will NOT be automatically applied to the invoice. 
+            In this case, you will need to add a charge for the end date directly to the invoice.', true); ?>
+        </p>
+        <br />
+        <p>
+            <?php echo l('Products also have different', true); ?> <strong><?php echo l('charging schemes.', true); ?></strong> 
+            <?php echo l('These are used to choose when and how you charge Products.', true); ?>
+        </p>
+        <br />
+        <p>
+            <?php echo l("Selecting 'on start date' charges the rate to the invoice only once on the the start date,
+            but allows you to record the start and end date that the extra applies to.
+            This can be useful for charging upfront fees or deposits for a rental.", true); ?>
+        </p>
+        <br />
+        <p>
+            <?php echo l("Selecting 'once a day' charges the rate on a re-occuring basis.
+            Reoccuring charges operate as described in the rental and item descriptions above.", true); ?>
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo l('Close', true); ?></button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <?php echo validation_errors('<div class="error">', '</div>'); ?>
 <style>
     body {
@@ -183,20 +239,29 @@
                                     <div class="text-left">
                                         <input type="hidden" name="rate_plan_extra" class="rate_plan_extra" />
                                         <?php if(isset($rate_plan['extras']) && $rate_plan['extras']): ?>
-                                        <div style="font-weight: 500;margin: 15px 0px 10px;">
-                                            <?php echo l('Product Items', true); ?>
+                                        <div style="font-size: 15px;font-weight: 500;margin: 15px 0px 10px;">
+                                            <?php echo l('Additional Products and Services', true); ?>
+                                            <a href=#
+                                                class="text-primary h4" 
+                                                aria-hidden="true" 
+                                                data-toggle="modal" 
+                                                data-target="#help-modal"
+                                            >(<?php echo l('About Products'); ?>)</a>
                                         </div>
 
                                         <table id="extras-fields" class="table">
                                             <thead>
-                                                <tr>
+                                                <tr class="table-header">
                                                     <th></th>
-                                                    <th>Items</th>
-                                                    <th>Rate</th>
+                                                    <th>Service</th>
+                                                    <th>Charge Scheme</th>
+                                                    <th>Price</th>
+                                                    <th class="head-qty hidden">Quantity</th>
                                                 </tr>
                                             </thead>
                                                 <?php
                                                 $extras = $rate_plan['extras'];
+                                                // prx($extras);
                                                 foreach($extras as $extra) : ?>
                                                     <tr for="extra-check-<?php echo $extra['extra_id']; ?>" class="extra-field-tr" id="<?php echo $extra['extra_id']; ?>" data-charge_type_id="<?php echo $extra['charge_type_id']; ?>" data-rate_plan_id="<?php echo $rate_plan_id; ?>">
                                                         <td style="width: 30px;">
@@ -206,6 +271,15 @@
                                                             <div class="name-rate-div-<?php echo $extra['extra_id']; ?>">
                                                                 <span class="name-span-<?php echo $extra['extra_id']; ?>"><?php echo $extra['extra_name']; ?></span>
                                                             </div>
+                                                        </td>
+                                                        <td>
+                                                            <?php if($extra['charging_scheme'] == 'on_start_date'){
+                                                                echo 'On start date';
+                                                            } else if($extra['charging_scheme'] == 'once_a_day' && $extra['extra_type'] == 'item'){
+                                                                echo 'Once a day (end date inclusive)';
+                                                            } else if($extra['charging_scheme'] == 'once_a_day' && $extra['extra_type'] == 'rental'){
+                                                                echo 'Once a day (end date exclusive)';
+                                                            } ?>
                                                         </td>
                                                         <td>
                                                             <div class="name-rate-div-<?php echo $extra['extra_id']; ?>">
@@ -223,9 +297,9 @@
                                                         </td>
                                                         <td style="padding: 4px;">
                                                             <div class="pull-right hidden form-inline qty-div-<?php echo $extra['extra_id']; ?>-<?php echo $rate_plan_id; ?>">
-                                                                <small><?php echo l('Qty', true); ?>: </small>
+                                                                <!-- <small><?php echo l('Qty', true); ?>: </small> -->
                                                                 <div class="input-group">
-                                                                    <input style="width: 50px;height: 30px;" size="1" type="number" name="extra_qty" min="1" value="1" class="form-control extra_qty_<?php echo $extra['extra_id']; ?>">
+                                                                    <input style="width: 70px;height: 30px;" type="number" name="extra_qty" min="1" value="1" class="form-control extra_qty_<?php echo $extra['extra_id']; ?>">
                                                                     <div class="input-group-btn">
                                                                         <button style="padding: 4px 6px;" type="button" class="btn btn-default qty_plus" id="<?php echo $extra['extra_id']; ?>">
                                                                             <i class="fa fa-plus"></i>
