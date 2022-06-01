@@ -61,147 +61,147 @@
     }
 </style>
 <div class="container">
-	<?php if (isset($view_data['available_rate_plans'])) { ?>	
+    <?php if (isset($view_data['available_rate_plans'])) { ?>   
 
-	<div class="col-md-4" style="background: white;box-shadow: 0px 0px 3px rgba(200, 206, 210, 0.5);">
-		<div class="page-header">
-			<h3>
-				<?php echo l('Booking Information'); ?>
-				<a href="<?php echo base_url() . 'online_reservation/select_dates_and_rooms/'.$this->uri->segment(3); ?>"
-					class="btn btn-default btn-sm pull-right" />
-					<?php echo l('Start Over'); ?>
-				</a>
-			</h3>
+    <div class="col-md-4" style="background: white;box-shadow: 0px 0px 3px rgba(200, 206, 210, 0.5);">
+        <div class="page-header">
+            <h3>
+                <?php echo l('Booking Information'); ?>
+                <a href="<?php echo base_url() . 'online_reservation/select_dates_and_rooms/'.$this->uri->segment(3); ?>"
+                    class="btn btn-default btn-sm pull-right" />
+                    <?php echo l('Start Over'); ?>
+                </a>
+            </h3>
 
-		</div>
+        </div>
 
-		<dl class="dl-horizontal">
-			<dt>
-				<?php echo l('check_in_date'); ?>:
-			</dt>
-			<dd>
-				<?php echo get_local_formatted_date($view_data['check_in_date'], $company_data['date_format']); ?>
-			</dd>
+        <dl class="dl-horizontal">
+            <dt>
+                <?php echo l('check_in_date'); ?>:
+            </dt>
+            <dd>
+                <?php echo get_local_formatted_date($view_data['check_in_date'], $company_data['date_format']); ?>
+            </dd>
 
-			<dt>
-				<?php echo l('Check-out Date'); ?>:
-			</dt>
-			<dd>
-				<?php echo get_local_formatted_date($view_data['check_out_date'], $company_data['date_format']); ?>
-			</dd>
+            <dt>
+                <?php echo l('Check-out Date'); ?>:
+            </dt>
+            <dd>
+                <?php echo get_local_formatted_date($view_data['check_out_date'], $company_data['date_format']); ?>
+            </dd>
 
-			<dt>
-				<?php echo l('Adults Count'); ?>:
-			</dt>
-			<dd>
-				<?php echo isset($view_data['adult_count'][0])?$view_data['adult_count'][0]:1; ?>
-			</dd>
+            <dt>
+                <?php echo l('Adults Count'); ?>:
+            </dt>
+            <dd>
+                <?php echo isset($view_data['adult_count'][0])?$view_data['adult_count'][0]:1; ?>
+            </dd>
 
-			<dt>
-				<?php echo l('Children Count'); ?>:
-			</dt>
-			<dd>
-				<?php echo isset($view_data['children_count'][0])?$view_data['children_count'][0]:0; ?>
-			</dd>
+            <dt>
+                <?php echo l('Children Count'); ?>:
+            </dt>
+            <dd>
+                <?php echo isset($view_data['children_count'][0])?$view_data['children_count'][0]:0; ?>
+            </dd>
 
-			<dt>
-				<?php echo l('Currency'); ?>:
-			</dt>
-			<dd>
-				<?php echo $view_data['default_currency']['currency_name']; ?>
-			</dd>
+            <dt>
+                <?php echo l('Currency'); ?>:
+            </dt>
+            <dd>
+                <?php echo $view_data['default_currency']['currency_name']; ?>
+            </dd>
 
-		</dl>
-	</div>
+        </dl>
+    </div>
 
-	<div class="col-md-8">
+    <div class="col-md-8">
 
-		<?php 
-			$is_rooms_available = false;
-			foreach ($view_data['available_rate_plans'] as $key => $rate_plan) :
-				$is_room_type_unavailable = false;
+        <?php 
+            $is_rooms_available = false;
+            foreach ($view_data['available_rate_plans'] as $key => $rate_plan) :
+                $is_room_type_unavailable = false;
 
                 $is_room_bookable = true;
 
-				$rate_plan_id = $rate_plan['rate_plan_id'];
-				$rate_plan_selected_count = 0; 
-				if(isset($view_data['rate_plan_selected_ids'])) :
-					foreach ($view_data['rate_plan_selected_ids'] as $rate_plan_selected):
-						if ($rate_plan_selected == $rate_plan_id)
-						{
-							$rate_plan_selected_count++;
-						}
-					endforeach;
-				endif ?>
-			
+                $rate_plan_id = $rate_plan['rate_plan_id'];
+                $rate_plan_selected_count = 0; 
+                if(isset($view_data['rate_plan_selected_ids'])) :
+                    foreach ($view_data['rate_plan_selected_ids'] as $rate_plan_selected):
+                        if ($rate_plan_selected == $rate_plan_id)
+                        {
+                            $rate_plan_selected_count++;
+                        }
+                    endforeach;
+                endif ?>
+            
                 <?php
                 if(isset($view_data['unavailable_room_types']) && $view_data['unavailable_room_types']){
                     foreach($view_data['unavailable_room_types'] as $key1 => $unavailable_room_type)
                     {
-                		if($unavailable_room_type['id'] == $rate_plan['room_type_id'])
-                		{
-                			$is_room_type_unavailable = true;
+                        if($unavailable_room_type['id'] == $rate_plan['room_type_id'])
+                        {
+                            $is_room_type_unavailable = true;
                             $is_room_bookable = false;
-                		}
+                        }
                     }
                 }
                 if($rate_plan['average_daily_rate'] != 0 || ($company_data['allow_free_bookings'] && (!$rate_plan['charge_type_id'] || $rate_plan['charge_type_id'] == '0')))
                 { 
-					$is_rooms_available = true;
+                    $is_rooms_available = true;
                 ?>                
-				<div class="panel-rate-plan-listing panel panel-<?php echo $is_room_type_unavailable ? 'default' : 'success' ?>	">
-					<div class="panel-body" style="padding-bottom: 0;padding-right: 0;">
-						<form action="<?php echo base_url() . 'online_reservation/show_reservations/'.$this->uri->segment(3).''; ?>" method="post">
-							
-							<!-- keeps the original check-in, check-out date, and # of rooms populated between pages-->
-							<!-- even though they aren't used in the program in any other way -->
-							<input type="hidden" value="<?php echo $this->uri->segment(3); ?>" name="company-id">
-							<input type="hidden" value="<?php echo $view_data['check_in_date']; ?>" name="check-in-date">
-							<input type="hidden" value="<?php echo $view_data['check_out_date']; ?>" name="check-out-date">			
-							<input type="hidden" value="<?php echo $view_data['adult_count']; ?>" name="adult_count">
-							<input type="hidden" value="<?php echo $view_data['children_count']; ?>" name="children_count">			
-							<input type="hidden" value="<?php echo $rate_plan_id; ?>" name="rate-plan-selected-ids[]">
-							
-							<?php if(isset($view_data['rate_plan_selected_ids'])) : ?>
-								<?php foreach ($view_data['rate_plan_selected_ids'] as $rate_plan_selected_id) : ?>
-									<input type="hidden" value="<?php echo $rate_plan_selected_id; ?>" name="rate-plan-selected-ids[]">
-								<?php endforeach ?>
-							<?php endif; ?>
+                <div class="panel-rate-plan-listing panel panel-<?php echo $is_room_type_unavailable ? 'default' : 'success' ?> ">
+                    <div class="panel-body" style="padding-bottom: 0;padding-right: 0;">
+                        <form action="<?php echo base_url() . 'online_reservation/show_reservations/'.$this->uri->segment(3).''; ?>" method="post">
+                            
+                            <!-- keeps the original check-in, check-out date, and # of rooms populated between pages-->
+                            <!-- even though they aren't used in the program in any other way -->
+                            <input type="hidden" value="<?php echo $this->uri->segment(3); ?>" name="company-id">
+                            <input type="hidden" value="<?php echo $view_data['check_in_date']; ?>" name="check-in-date">
+                            <input type="hidden" value="<?php echo $view_data['check_out_date']; ?>" name="check-out-date">         
+                            <input type="hidden" value="<?php echo $view_data['adult_count']; ?>" name="adult_count">
+                            <input type="hidden" value="<?php echo $view_data['children_count']; ?>" name="children_count">         
+                            <input type="hidden" value="<?php echo $rate_plan_id; ?>" name="rate-plan-selected-ids[]">
+                            
+                            <?php if(isset($view_data['rate_plan_selected_ids'])) : ?>
+                                <?php foreach ($view_data['rate_plan_selected_ids'] as $rate_plan_selected_id) : ?>
+                                    <input type="hidden" value="<?php echo $rate_plan_selected_id; ?>" name="rate-plan-selected-ids[]">
+                                <?php endforeach ?>
+                            <?php endif; ?>
 
-							
-							<!-- Picture will go here -->
-							<div class="col-md-3" style="padding: 0;">
-										
-								<?php
-									// Display room type image
-									if (isset($rate_plan['images'][0])):
-										foreach ($rate_plan['images'] as $image_index => $image):
+                            
+                            <!-- Picture will go here -->
+                            <div class="col-md-3" style="padding: 0;">
+                                        
+                                <?php
+                                    // Display room type image
+                                    if (isset($rate_plan['images'][0])):
+                                        foreach ($rate_plan['images'] as $image_index => $image):
 
-								?>
-											
-												<a href="<?php echo $this->image_url . $company_data['company_id']."/".$image['filename']; ?>"
-												class=" <?php 
-															if ($image_index === 0) 
-																echo "col-md-12"; 
-															else 
-																echo "col-md-4 hidden-xs"; 
-														?> thumbnail"  data-lightbox="<?php echo $rate_plan_id; ?>" >
-													<img src="<?php echo $this->image_url . $company_data['company_id']."/".$image['filename']; ?>" />
-												</a>
-										
-								<?php
-										endforeach;
-									else:
-								?>
-										<div class="panel panel-default text-center">
-											<div class="h4 text-muted"><?php echo l('Photo not available'); ?></div>
-										</div>
-																							
-								<?php
-									endif;
-								?>
-							
-							</div>
+                                ?>
+                                            
+                                                <a href="<?php echo $this->image_url . $company_data['company_id']."/".$image['filename']; ?>"
+                                                class=" <?php 
+                                                            if ($image_index === 0) 
+                                                                echo "col-md-12"; 
+                                                            else 
+                                                                echo "col-md-4 hidden-xs"; 
+                                                        ?> thumbnail"  data-lightbox="<?php echo $rate_plan_id; ?>" >
+                                                    <img src="<?php echo $this->image_url . $company_data['company_id']."/".$image['filename']; ?>" />
+                                                </a>
+                                        
+                                <?php
+                                        endforeach;
+                                    else:
+                                ?>
+                                        <div class="panel panel-default text-center">
+                                            <div class="h4 text-muted"><?php echo l('Photo not available'); ?></div>
+                                        </div>
+                                                                                            
+                                <?php
+                                    endif;
+                                ?>
+                            
+                            </div>
                             <div class="col-md-9">
                                 <div class="col-md-7">
                                     <h3 class="panel-title">
@@ -283,7 +283,7 @@
                                                         </td>
                                                         <td>
                                                             <div class="name-rate-div-<?php echo $extra['extra_id']; ?>">
-                                                                <span class="rate-span-<?php echo $extra['extra_id']; ?>"><?php echo number_format($extra['rate'], 2, ".", ","); ?></span>
+                                                                <span class="rate-span-<?php echo $extra['extra_id']; ?>"><?php echo number_format($extra['rate'], 2, ".", ""); ?></span>
                                                             </div>
                                                             <div class="hidden name-rate-div-<?php echo $extra['extra_id']; ?>">
                                                                 <span class="charging-scheme-span-<?php echo $extra['extra_id']; ?>"><?php echo $extra['charging_scheme']; ?></span>
@@ -344,14 +344,14 @@
                             </div>
                             <input type="submit" name="submit" value="<?php echo l('Book', 1); ?>" class="btn btn-<?= $is_room_bookable ? 'primary' : 'default';?> btn-lg" <?=$is_room_bookable ? '' : 'disabled';?> style="width: 200px;float: right; border-radius: 0; padding: 7px;" />
                         </form>
-					</div>
-				</div>
+                    </div>
+                </div>
                 <?php
                 }
                 endforeach;
-				
+                
                 if(!$is_rooms_available):
-				?>
+                ?>
                     <div class="container-fluid">
                         <div
                             class="alert alert-danger alert-dismissible" role="alert"
@@ -371,9 +371,9 @@
                             <?php echo l('<br/>There are no rooms available for the dates you have selected. Please select another date to check availability.', true); ?>
                         </div>
                     </div>
-                <?php  endif; ?>		
-		<?php } ?>
-	</div>
-	
-		
+                <?php  endif; ?>        
+        <?php } ?>
+    </div>
+    
+        
 </div>
