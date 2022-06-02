@@ -1727,7 +1727,7 @@ class Online_reservation extends MY_Controller
         // Call function to load translation of language
         load_translations($language_id);
 
-        echo l('success', true);
+        echo 'success';
         return;
     }
 
