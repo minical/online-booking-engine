@@ -128,6 +128,13 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
             </dd>
 
             <dt>
+                <?php echo l('Number of Days', true); ?>:
+            </dt>
+            <dd>
+                <?php  echo (strtotime($view_data['check_out_date']) - strtotime($view_data['check_in_date']))/(3600*24); ?>
+            </dd>
+
+            <dt>
                 <?php echo l('Adults Count'); ?>:
             </dt>
             <dd>

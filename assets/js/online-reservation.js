@@ -858,10 +858,9 @@ $(document).on('click', '.qty_minus', function() {
     if (qty > 1) {
         $(this).parents('.input-group').find('.extra_qty_' + extraID).val(parseInt(qty) - 1);
 
-        $.each(extraCharges, function(key, value) {
-            if (value.extra_id == extraID) {
-                extraCharges.splice(key, 1);
-                return false;
+        $.each(extraCharges, function(i, v){
+            if(v.extra_id == extraID){
+                extraCharges[i].quantity = parseInt(qty) - 1;
             }
         });
         $('.rate_plan_extra').val(JSON.stringify(extraCharges));

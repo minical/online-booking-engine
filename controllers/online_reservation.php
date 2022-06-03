@@ -826,10 +826,11 @@ class Online_reservation extends MY_Controller
         $grand_extra_total = 0;
         $extra_sub_total = 0;
         $extra_tax_amount = 0;
-
+        $extra_charges = 0;
+        
         if($rate_plan_extra && count($rate_plan_extra) > 0){
             $get_amount_only = true;
-            $extra_charges = 0;
+            
             foreach ($rate_plan_extra as $extra) {
 
                 $extra['start_date'] = $data['view_data']['check_in_date'];
@@ -943,7 +944,7 @@ class Online_reservation extends MY_Controller
             }
         }
 
-        $data['view_data']['grand_total'] = $grand_extra_total = $extra_charges;
+        $data['view_data']['grand_total'] = $grand_extra_total = $extra_charges ? $extra_charges : 0;
         $data['view_data']['sub_total'] += $grand_extra_total;
         $data['view_data']['tax_amount'] += $extra_tax_amount;
         $data['view_data']['total'] = $data['view_data']['sub_total'] + $data['view_data']['tax_amount'];
