@@ -253,17 +253,17 @@
                                                 aria-hidden="true" 
                                                 data-toggle="modal" 
                                                 data-target="#help-modal"
-                                            >(<?php echo l('About Products'); ?>)</a>
+                                            >(<?php echo l('About Products', true); ?>)</a>
                                         </div>
 
                                         <table id="extras-fields" class="table">
                                             <thead>
                                                 <tr class="table-header">
                                                     <th></th>
-                                                    <th>Service</th>
-                                                    <th>Charge Scheme</th>
-                                                    <th>Price</th>
-                                                    <th class="head-qty hidden">Quantity</th>
+                                                    <th><?php echo l('Service', true); ?></th>
+                                                    <th><?php echo l('Charge Scheme', true); ?></th>
+                                                    <th><?php echo l('Price', true); ?></th>
+                                                    <th class="head-qty hidden"><?php echo l('Quantity', true); ?></th>
                                                 </tr>
                                             </thead>
                                                 <?php
@@ -281,11 +281,11 @@
                                                         </td>
                                                         <td>
                                                             <?php if($extra['charging_scheme'] == 'on_start_date'){
-                                                                echo 'On start date';
+                                                                echo l('On start date', true);
                                                             } else if($extra['charging_scheme'] == 'once_a_day' && $extra['extra_type'] == 'item'){
-                                                                echo 'Once a day (end date inclusive)';
+                                                                echo l('Once a day (end date inclusive)', true);
                                                             } else if($extra['charging_scheme'] == 'once_a_day' && $extra['extra_type'] == 'rental'){
-                                                                echo 'Once a day (end date exclusive)';
+                                                                echo l('Once a day (end date exclusive)', true);
                                                             } ?>
                                                         </td>
                                                         <td>

@@ -52,5 +52,17 @@ $lang['online-booking-engine']['Date range should not be less than %d nights'] =
 $lang['online-booking-engine']['Please select a date range of at least %d nights'] = 'Selecione um intervalo de datas de pelo menos% d noites';
 $lang['online-booking-engine']['Please select a date range between %d and %d nights'] = 'Selecione um intervalo de datas entre% d e% d noites';
 $lang['online-booking-engine']['Please select a date range'] = 'Selecione um intervalo de datas';
-
+$lang['online-booking-engine']['Additional Products and Services'] = 'Additional Products and Services';
+$lang['online-booking-engine']['About Products'] = 'Sobre os produtos';
+$lang['online-booking-engine']['Service'] = 'Serviço';
+$lang['online-booking-engine']['Charge Scheme'] = 'Esquema de cobrança';
+$lang['online-booking-engine']['Price'] = 'Preço';
+$lang['online-booking-engine']['Quantity'] = 'Quantidade';
+$lang['online-booking-engine']['On start date'] = 'Na data de início';
+$lang['online-booking-engine']['Once a day (end date inclusive)'] = 'Uma vez por dia (inclusive a data de término)';
+$lang['online-booking-engine']['Once a day (end date exclusive)'] = 'Uma vez por dia (data de término exclusiva)';
+$lang['online-booking-engine']['Product Items'] = 'Itens do produto';
+$lang['online-booking-engine']['Name'] = 'Nome';
+$lang['online-booking-engine']['Amount'] = 'Quantia';
+$lang['online-booking-engine']['Qty'] = 'Quantidade';
 ?>
