@@ -80,7 +80,7 @@ class Online_reservation extends MY_Controller
             $white_label_name = $white_label_name[0];
         }
         $data['whitelabel_detail'] = '';
-        $white_label_detail = $this->Whitelabel_partner_model->get_partners(array('username' => $white_label_name));
+        $white_label_detail = $this->Whitelabel_partner_model->get_partner_by_username($white_label_name);
         if($white_label_detail)
         {
             $white_label_detail = $white_label_detail[0];
