@@ -94,7 +94,7 @@
                 <?php echo l('Number of Days', true); ?>:
             </dt>
             <dd>
-                <?php  echo (strtotime($view_data['check_out_date']) - strtotime($view_data['check_in_date']))/(3600*24); ?>
+                <?php echo intval((strtotime($view_data['check_out_date']) - strtotime($view_data['check_in_date']))/(3600*24)); ?>
             </dd>
 
 			<dt>
