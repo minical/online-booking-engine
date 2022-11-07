@@ -75,6 +75,7 @@ class Online_reservation extends MY_Controller
         // Set the white label session for the online bookings
         $host_name = $_SERVER['HTTP_HOST'];
         $white_label_name = explode('.', $host_name);
+
         if(count($white_label_name) > 0)
         {
             $white_label_name = $white_label_name[0];
@@ -609,7 +610,7 @@ class Online_reservation extends MY_Controller
         }
         else
         {
-            echo json_encode(array('success' => false, 'msg' => l('No rooms available on the selected dates. Please try changing the dates.', true)));
+            echo json_encode(array('success' => false, 'msg' => l('No rooms available on the selected dates. Please try changing the dates.', true), 'avail_rate_plan' => $is_available_rate_plan, 'avail_room' => $is_available_room));
         }
 
     }
@@ -974,16 +975,21 @@ class Online_reservation extends MY_Controller
             );
         }
 
-        $this->load->library('form_validation');
+		$data['gateway_credentials']            = $this->paymentgateway->getSelectedGatewayCredentials(1);
+        $gateway_settings                       = $this->paymentgateway->getCompanyGatewaySettings();
+        $data['store_cc_in_booking_engine']     = (bool)$gateway_settings['store_cc_in_booking_engine'];
+        $data['are_gateway_credentials_filled'] = $this->paymentgateway->areGatewayCredentialsFilled();
+
+		$this->load->library('form_validation');
         if(count($data['booking_engine_fields']) > 0):
             foreach ($data['booking_engine_fields'] as $key => $value):
 
                 if($value['id'] == BOOKING_FIELD_NAME){
-                    $name = 'customer-name';
+                    $name = 'customer_name';
                     $is_required = $value['show_on_booking_form'] && $value['is_required'] ? 'required' : '';
                     $error_name = $value['field_name'];
                 } else if($value['id'] == BOOKING_FIELD_EMAIL){
-                    $name = 'customer-email';
+                    $name = 'customer_email';
                     $is_required = $value['show_on_booking_form'] && $value['is_required'] ? 'required' : '';
                     $error_name = $value['field_name'];
                 } else if($value['id'] == BOOKING_FIELD_PHONE){
@@ -1007,11 +1013,11 @@ class Online_reservation extends MY_Controller
                     $is_required = $value['show_on_booking_form'] && $value['is_required'] ? 'required' : '';
                     $error_name = $value['field_name'];
                 } else if($value['id'] == BOOKING_FIELD_POSTAL_CODE){
-                    $name = 'postal-code';
+                    $name = 'postal_code';
                     $is_required = $value['show_on_booking_form'] && $value['is_required'] ? 'required' : '';
                     $error_name = $value['field_name'];
                 } else if($value['id'] == BOOKING_FIELD_SPECIAL_REQUEST){
-                    $name = 'special-requests';
+                    $name = 'special_requests';
                     $is_required = $value['show_on_booking_form'] && $value['is_required'] ? 'required' : '';
                     $error_name = $value['field_name'];
                 }
@@ -1023,13 +1029,13 @@ class Online_reservation extends MY_Controller
                 );
             endforeach;
         else:
-            $this->form_validation->set_rules(
-                'customer-name',
+			$this->form_validation->set_rules(
+                'customer_name',
                 'Name',
                 'required|trim'
             );
             $this->form_validation->set_rules(
-                'customer-email',
+                'customer_email',
                 'Email',
                 'required|trim|valid_email'
             );
@@ -1059,24 +1065,23 @@ class Online_reservation extends MY_Controller
                 'Country',
                 'required|trim'
             );
-            $this->form_validation->set_rules(
-                'postal-code',
+            
+			$this->form_validation->set_rules(
+                'postal_code',
                 'Postal/Zip Code',
                 'trim'
             );
-            $this->form_validation->set_rules(
-                'special-requests',
+			
+			$this->form_validation->set_rules(
+                'special_requests',
                 'Special Requests',
                 'trim'
             );
         endif;
 
-        $data['gateway_credentials']            = $this->paymentgateway->getSelectedGatewayCredentials(1);
-        $gateway_settings                       = $this->paymentgateway->getCompanyGatewaySettings();
-        $data['store_cc_in_booking_engine']     = (bool)$gateway_settings['store_cc_in_booking_engine'];
-        $data['are_gateway_credentials_filled'] = $this->paymentgateway->areGatewayCredentialsFilled();
       
-        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] !== 'nexio'){
+      
+        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] !== 'nexio'  and $gateway_settings['selected_payment_gateway'] !== 'pcibooking'){
             $this->form_validation->set_rules(
                 'cc_number',
                 'CC number',
@@ -1106,13 +1111,16 @@ class Online_reservation extends MY_Controller
 
         if ($this->form_validation->run() == FALSE && $nexio_active == 0) {         
             $data['main_content'] = '../extensions/'.$this->module_name.'/views/book_reservation';
+
             $this->template->load('online_reservation_template', null , $data['main_content'], $data);
 
         }elseif($gateway_settings['selected_payment_gateway'] == 'nexio' && $this->form_validation->run() == FALSE && $nexio_active == 1){
+
             $response = array(
                 'status' => 'error',
                 'message' => "please fill all the required fields."
             );
+
              echo json_encode($response);
         }
          else {
@@ -1125,9 +1133,11 @@ class Online_reservation extends MY_Controller
 
                 $customer_data                  = array();
                 $customer_data['company_id']    = $company_id;
-                $customer_data['customer_name'] = sqli_clean($this->security->xss_clean($this->input->post('customer-name')));
+                // $customer_data['customer_name'] = sqli_clean($this->security->xss_clean($this->input->post('customer-name')));
+				$customer_data['customer_name'] = sqli_clean($this->security->xss_clean($this->input->post('customer_name')));
 
-                $customer_data['email']         = sqli_clean($this->security->xss_clean($this->input->post('customer-email')));
+                // $customer_data['email']         = sqli_clean($this->security->xss_clean($this->input->post('customer-email')));
+				$customer_data['email']         = sqli_clean($this->security->xss_clean($this->input->post('customer_email')));
 
                 $customer_data['customer_type'] = 'PERSON';
 
@@ -1141,7 +1151,7 @@ class Online_reservation extends MY_Controller
 
                 $customer_data['country']       = sqli_clean($this->security->xss_clean($this->input->post('country')));
 
-                $customer_data['postal_code']   = sqli_clean($this->security->xss_clean($this->input->post('postal-code')));
+				$customer_data['postal_code']   = sqli_clean($this->security->xss_clean($this->input->post('postal_code')));
 
                 if ($customer_id = $this->Customer_model->get_customer_id_by_email($customer_data['email'], $company_id)) {
                     $this->Customer_model->update_customer($customer_id, $customer_data);
@@ -1167,8 +1177,8 @@ class Online_reservation extends MY_Controller
                 $cvc = sqli_clean($this->security->xss_clean($this->input->post('cc_cvc')));
 
                 $cc_expiry = explode(' / ', $cc_expiry);
-                $customer_data['cc_expiry_month'] = $cc_expiry_month = $cc_expiry[0] ?? null;
-                $customer_data['cc_expiry_year'] = $cc_expiry_year = $cc_expiry[1] ?? null;
+                $customer_data['cc_expiry_month'] = $cc_expiry_month = isset($cc_expiry[0]) && $cc_expiry[0] ? $cc_expiry[0] : null;
+                $customer_data['cc_expiry_year'] = $cc_expiry_year = isset($cc_expiry[1]) && $cc_expiry[1] ? $cc_expiry[1] : null;
 
                 $card_details = array(
                         'is_primary' => 1,
@@ -1197,7 +1207,9 @@ class Online_reservation extends MY_Controller
                             'cardholder_name'   => (isset($customer_data['customer_name']) ? $customer_data['customer_name'] : ""),
                             'service_code'      => $cvc,
                             'expiration_month'  => isset($customer_data['cc_expiry_month']) ? $customer_data['cc_expiry_month'] : null,
-                            'expiration_year'   => isset($customer_data['cc_expiry_year']) ? $customer_data['cc_expiry_year'] : null
+                            'expiration_year'   => isset($customer_data['cc_expiry_year']) ? $customer_data['cc_expiry_year'] : null,
+							'cc_tokenex_token' => null
+
                         )
                     );
                     $card_response = array();
@@ -1270,7 +1282,7 @@ class Online_reservation extends MY_Controller
                     $booking_data['source']              = ($booking_source && $booking_source == 'seasonal.io') ? SOURCE_SEASONAL : SOURCE_ONLINE_WIDGET;
                     $booking_data['company_id']          = $company_id;
                     $booking_data['booking_customer_id'] = $customer_id;
-                    $booking_data['booking_notes']       = sqli_clean($this->security->xss_clean($this->input->post('special-requests')));
+					$booking_data['booking_notes']       = sqli_clean($this->security->xss_clean($this->input->post('special_requests')));
 
 
                     // extras in booking notes
@@ -1526,25 +1538,49 @@ class Online_reservation extends MY_Controller
 
                 
                   // $this->template->load('includes/online_reservation_template', null , $data['main_content'], $data);
-             
-                    
-
                 $this->session->set_userdata($data);
-
                 if($gateway_settings['selected_payment_gateway'] == 'nexio' && $nexio_active == 1){
                     $res = array(
                         'customer_id' => $customer_id,
                         "url" => 'online_reservation/reservation_success/'.$this->uri->segment(3)
                     );
+	
+
                     echo json_encode($res);
                   
-                }else{
+                }
+				elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $this->is_pci_booking_enabled == true){
+
+					$customer_card__data = $this->input->post();
+					$customer_card__data['meta_data']['pci_token'] = $customer_card__data['customer_data']['cc_token'];
+					$customer_card__data['meta_data']['source'] = "pci_booking";
+
+					$data = [];
+					$data['cc_number'] = $customer_card__data['customer_data']['cc_number'];
+					$data['cc_expiry_month'] = $customer_card__data['customer_data']['cc_expiry_month'];
+					$data['cc_expiry_year'] = $customer_card__data['customer_data']['cc_expiry_year'];
+
+					$data['customer_meta_data'] = json_encode($customer_card__data['meta_data']);
+
+					$this->load->model('Card_model');
+
+					$customer_card__data = $this->Card_model->update_customer_primary_card($customer_id, $data);
+					$res = array(
+						"url" => 'online_reservation/reservation_success/'.$this->uri->segment(3)
+					);
+					echo json_encode($res);
+			    }
+				else{
+
                     redirect('/online_reservation/reservation_success/'.$this->uri->segment(3)); 
+					
                 }  
 
             } else {
                 echo l('We\'re sorry. The rooms you selected are no longer available. Please start over and select new rooms.', true);
             }
+
+			
         }
     }
 
