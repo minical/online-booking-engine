@@ -1017,6 +1017,8 @@ class Online_reservation extends MY_Controller
             );
         }
 
+        $data['view_data']['gateway_settings'] = $gateway_settings;
+
         if (!$data['view_data']['check_in_date'] || !$data['view_data']['check_out_date']) {
             redirect('/online_reservation/select_dates_and_rooms/'.$this->uri->segment(3));
         }

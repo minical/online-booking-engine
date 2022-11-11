@@ -10,5 +10,6 @@ $config = array(
     "view_link" => "online_reservation/select_dates_and_rooms/".$this->company_id,
     "is_vendor_module" => true,
     "categories" => array("online_booking_engine"),
+    "supported_in_minimal" => true,
     "marketplace_product_link" => "http://marketplace.minical.io/product/online-booking-engine/"
 );

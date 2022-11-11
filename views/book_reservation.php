@@ -273,11 +273,11 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                     <?php if(count($booking_engine_fields) > 0):
                         foreach ($booking_engine_fields as $key => $value):
                         if($value['id'] == BOOKING_FIELD_NAME){
-                            $name = 'customer-name';
+                            $name = 'customer_name';
                             $is_required = $value['is_required'] ? 'required' : '';
                             $show = $value['show_on_booking_form'] ? '' : 'hidden';
                         } else if($value['id'] == BOOKING_FIELD_EMAIL){
-                            $name = 'customer-email';
+                            $name = 'customer_email';
                             $is_required = $value['is_required'] ? 'required' : '';
                             $show = $value['show_on_booking_form'] ? '' : 'hidden';
                         } else if($value['id'] == BOOKING_FIELD_PHONE){
@@ -301,11 +301,11 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                             $is_required = $value['is_required'] ? 'required' : '';
                             $show = $value['show_on_booking_form'] ? '' : 'hidden';
                         } else if($value['id'] == BOOKING_FIELD_POSTAL_CODE){
-                            $name = 'postal-code';
+                            $name = 'postal_code';
                             $is_required = $value['is_required'] ? 'required' : '';
                             $show = $value['show_on_booking_form'] ? '' : 'hidden';
                         } else if($value['id'] == BOOKING_FIELD_SPECIAL_REQUEST){
-                            $name = 'special-requests';
+                            $name = 'special_requests';
                             $is_required = $value['is_required'] ? 'required' : '';
                             $show = $value['show_on_booking_form'] ? '' : 'hidden';
                         }
@@ -353,10 +353,10 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                         <input type="hidden" name="store_cc_in_booking_engine" id="store_cc_in_booking_engine" value="<?php echo $store_cc_in_booking_engine; ?>">
                         <input type="hidden" name="are_gateway_credentials_filled" id="are_gateway_credentials_filled" value="<?php echo $are_gateway_credentials_filled; ?>">
 
-                    <?php if ($store_cc_in_booking_engine and $are_gateway_credentials_filled): ?>
-                        <!-- <script>
-                            var stripe_publishable_key = "<?php echo isset($gateway_credentials['stripe_publishable_key']) ? $gateway_credentials['stripe_publishable_key'] : '';?>";
-                        </script> -->
+					<?php if ($store_cc_in_booking_engine and $are_gateway_credentials_filled and $view_data['gateway_settings']['selected_payment_gateway'] == 'pcibooking') : ?>
+						<div class="col-sm-9 add_card_details"></div>
+                    <?php elseif ($store_cc_in_booking_engine and $are_gateway_credentials_filled): ?>
+                        
                         <div class="form-group cc_details">
                             <label for="birthday" class=" col-md-3 control-label"><?php echo l('Credit card'); ?>
                                 <span style="color:red;">*</span>
@@ -447,13 +447,22 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                     </div>
                     
                     <?php 
-                     if(isset($this->module_assets_files['nexio_integration']) && $this->company_data['selected_payment_gateway'] =='nexio'){?>
+                     if(isset($this->module_assets_files['nexio_integration']) && $view_data['gateway_settings']['selected_payment_gateway'] =='nexio'){?>
                         <input type="hidden" value='0' name='nexio_active' id='nexio_active' class='nexio_active'>
                         <input type="button" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right" id="booking_engine_form"/>
+                    <?php } else if (
+                        $store_cc_in_booking_engine and 
+                        $are_gateway_credentials_filled and 
+                        (
+                            ($view_data['gateway_settings']['selected_payment_gateway'] == 'pcibooking')
+                             || $view_data['gateway_settings']['selected_payment_gateway'] == 'kovena')
+                         ){  ?>
+						<input type="button" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right book_now" />
                     <?php }else{?>
                         <input type="submit" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right" />
 
                     <?php }?>
+                    <input type="hidden" name="company_id" id="company_id" value="<?php echo $company_data['company_id']; ?>">
                 </form>
             </div>
         </div>
