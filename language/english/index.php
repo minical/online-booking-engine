@@ -51,5 +51,17 @@ $lang['online-booking-engine']['Date range should not be less than %d nights'] =
 $lang['online-booking-engine']['Please select a date range of at least %d nights'] = 'Please select a date range of at least %d nights';
 $lang['online-booking-engine']['Please select a date range between %d and %d nights'] = 'Please select a date range between %d and %d nights';
 $lang['online-booking-engine']['Please select a date range'] = 'Please select a date range';
-
+$lang['online-booking-engine']['Additional Products and Services'] = 'Additional Products and Services';
+$lang['online-booking-engine']['About Products'] = 'About Products';
+$lang['online-booking-engine']['Service'] = 'Service';
+$lang['online-booking-engine']['Charge Scheme'] = 'Charge Scheme';
+$lang['online-booking-engine']['Price'] = 'Price';
+$lang['online-booking-engine']['Quantity'] = 'Quantity';
+$lang['online-booking-engine']['On start date'] = 'On start date';
+$lang['online-booking-engine']['Once a day (end date inclusive)'] = 'Once a day (end date inclusive)';
+$lang['online-booking-engine']['Once a day (end date exclusive)'] = 'Once a day (end date exclusive)';
+$lang['online-booking-engine']['Product Items'] = 'Product Items';
+$lang['online-booking-engine']['Name'] = 'Name';
+$lang['online-booking-engine']['Amount'] = 'Amount';
+$lang['online-booking-engine']['Qty'] = 'Qty';
 ?>

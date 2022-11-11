@@ -905,12 +905,12 @@ HotelDatepicker.prototype.showSelectedInfo = function showSelectedInfo () {
         // Show first date
 	if (this.start) {
 		selectedInfo.style.display = '';
-		elStart.textContent = this.getDateString(new Date(parseInt(this.start, 10)), this.infoFormat);
+		elStart.textContent = innGrid._getLocalFormattedDate(this.getDateString(new Date(parseInt(this.start, 10)), this.infoFormat));
 	}
 
         // Show second date
 	if (this.end) {
-		elEnd.textContent = this.getDateString(new Date(parseInt(this.end, 10)), this.infoFormat);
+		elEnd.textContent = innGrid._getLocalFormattedDate(this.getDateString(new Date(parseInt(this.end, 10)), this.infoFormat));
 	}
 
         // If both dates are set, show the count and set the value of our input

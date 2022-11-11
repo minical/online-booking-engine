@@ -25,6 +25,7 @@ class Online_reservation extends MY_Controller
         
         $this->load->library('PHPRequests');
         $this->load->library('email_template');
+        $this->load->helper('date_format_helper');
         
         $this->load->helper('url');
         $this->ci->load->helper('language_translation_helper');
@@ -74,12 +75,13 @@ class Online_reservation extends MY_Controller
         // Set the white label session for the online bookings
         $host_name = $_SERVER['HTTP_HOST'];
         $white_label_name = explode('.', $host_name);
+
         if(count($white_label_name) > 0)
         {
             $white_label_name = $white_label_name[0];
         }
         $data['whitelabel_detail'] = '';
-        $white_label_detail = $this->Whitelabel_partner_model->get_partners(array('username' => $white_label_name));
+        $white_label_detail = $this->Whitelabel_partner_model->get_partner_by_username($white_label_name);
         if($white_label_detail)
         {
             $white_label_detail = $white_label_detail[0];
@@ -97,6 +99,16 @@ class Online_reservation extends MY_Controller
         if($data['whitelabel_detail'])
         {
             $this->session->set_userdata('white_label_information', $white_label_detail);
+        } else {
+
+            $partner_id = $company_data['partner_id'];
+
+            $condition = array('id' => $partner_id);
+            $white_label_detail = $this->Whitelabel_partner_model->get_partners($condition);
+            if($white_label_detail)
+            {
+                $this->session->set_userdata('white_label_information', $white_label_detail[0]);
+            }
         }
 
         $time_zone = $this->Company_model->get_time_zone($company_id);
@@ -139,11 +151,8 @@ class Online_reservation extends MY_Controller
             'children_count',
             'Children',
             'trim'
-        );/*
-        $this->form_validation->set_rules(
-                                    'promo-code',
-                                    'Promo Code',
-                                    'trim'); */
+        );
+
         $data['show_error'] = false;
 
         $http_origin = (isset($_SERVER['HTTP_ORIGIN']) && $_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
@@ -172,28 +181,34 @@ class Online_reservation extends MY_Controller
             $available_room_types = $this->Room_type_model->get_room_type_availability($company_id, $ota_id, $check_in_date, $check_out_date, $adult_count, $children_count, true, null, true, true, true, true, $company_access_key, 'obe');
 
             $total_availability   = 0;
-            $available_rate_plans = array();
+            $available_rate_plans = $rooms_available = $unavailable_room_types = array();
+                // prx($available_room_types);
             foreach ($available_room_types as $key => $available_room_type) {
-
                 unset($available_room_types[$key]['description']);
                 unset($available_room_type['description']);
 
-                //$room_type_images = $this->Image_model->get_images($available_room_type['image_group_id']);
-
-                // check if there's enough room for the date range for the requested number of rooms.
-                // if not, then continue to next room type
                 $minimum_avaialbility_of_current_room_type = 999;
-                foreach ($available_room_type['availability'] as $availability)
-                {
-                    if (
-                        ($minimum_avaialbility_of_current_room_type > $availability['availability']) &&
-                        ($availability['date_start'] != $availability['date_end']))
+                if (isset($available_room_type['availability']) && $available_room_type['availability'] && count($available_room_type['availability']) > 0) {
+                    foreach ($available_room_type['availability'] as $availability)
                     {
-                        $minimum_avaialbility_of_current_room_type = $availability['availability'];
+                        if (
+                            ($minimum_avaialbility_of_current_room_type > $availability['availability']) &&
+                            ($availability['date_start'] != $availability['date_end'])
+                        )
+                        {
+                            $minimum_avaialbility_of_current_room_type = $availability['availability'];
+                        }
                     }
+                } else {
+                    $minimum_avaialbility_of_current_room_type = 0;
                 }
+
+                $number_of_rooms_requested = 1;
                 if ($minimum_avaialbility_of_current_room_type < $number_of_rooms_requested)
-                    continue;
+                {
+                    // continue;
+                    $unavailable_room_types[] = array ('id' => $available_room_type['id']);
+                }
 
                 $rate_plans = $this->Rate_plan_model->get_rate_plans_by_room_type_id($available_room_type['id']);
 
@@ -202,83 +217,68 @@ class Online_reservation extends MY_Controller
                     foreach ($rate_plans as $rate_plan) {
                         if ($rate_plan['is_shown_in_online_booking_engine'] == '1')
                         {
+
                             $rates = $this->Rate_model->get_daily_rates($rate_plan['rate_plan_id'], $check_in_date, $check_out_date);
 
-                            /* RESTRICTION CHECKS */
-                            // check if this rate plan can be sold online for all date ranges in effect.
                             $passed_all_restrictions = true;
 
                             foreach ($rates as $rate) {
                                 if ($rate['can_be_sold_online'] != '1') {
-                                    //echo "DEBUG: rate couldn't be sold online<br/>\n";
                                     $passed_all_restrictions = false;
                                 }
 
                                 if ($rate['minimum_length_of_stay'] > $length_of_stay && isset($rate['minimum_length_of_stay'])) {
-                                    //echo $rate_plan['rate_plan_id']."DEBUG: minimum_length_of_stay is greater than length_of_stay<br/>\n";
-                                    $passed_all_restrictions = false;
+                                    $rate_plan['min_length']="This room requires minimum ".$rate['minimum_length_of_stay']." nights of stay";
                                 }
 
                                 if ($rate['maximum_length_of_stay'] < $length_of_stay && isset($rate['maximum_length_of_stay'])) {
-                                    //echo $rate_plan['rate_plan_id']."DEBUG: maximum_length_of_stay is less than length_of_stay<br/>\n";
-                                    $passed_all_restrictions = false;
+                                    $rate_plan['max_length']="This room requires maximum ".$rate['maximum_length_of_stay']." nights of stay";
                                 }
 
                                 if (
                                     $rate['date'] == $check_in_date &&
-                                    //(
-                                    //    $rate['minimum_length_of_stay_arrival'] > $length_of_stay ||
                                     $rate['closed_to_arrival'] == '1'
-                                    //) && isset($rate['minimum_length_of_stay_arrival'])
                                 ) {
-                                    //echo $rate_plan['rate_plan_id']."DEBUG: minimum_length_of_stay_arrival is greater than length_of_stay<br/>\n";
-                                    $passed_all_restrictions = false;
+                                    $rate_plan['arrival']="please enable close to arrival on selected date";
                                 }
+                            }
 
+                            $checkout_date = date('Y-m-d', strtotime($check_out_date . " + 1 day"));
+
+                            $rates = $this->Rate_model->get_daily_rates($rate_plan['rate_plan_id'], $check_in_date, $checkout_date);
+
+                            foreach ($rates as $rate) {
                                 if (
                                     $rate['date'] == $check_out_date &&
-                                    //(
-                                    //    $rate['minimum_length_of_stay_arrival'] > $length_of_stay ||
                                     $rate['closed_to_departure'] == '1'
-                                    //) && isset($rate['minimum_length_of_stay_arrival'])
                                 ) {
-                                    //echo $rate_plan['rate_plan_id']."DEBUG: minimum_length_of_stay_arrival is greater than length_of_stay<br/>\n";
-                                    $passed_all_restrictions = false;
+                                    $rate_plan['departure']="please enable close to departure on selected date";
                                 }
                             }
 
                             if ($passed_all_restrictions) {
-                                //$rate_plan_images       = $this->Image_model->get_images($rate_plan['image_group_id']);
-
-                                //$rate_plan['images']    = array_merge($rate_plan_images, $room_type_images);
-                                //$rate_plan['images']    = $room_type_images;
                                 $rate_plan['room_type_image_group_id']    = $available_room_type['image_group_id'];
 
                                 unset($rate_plan['description']);
 
+                                $rate_plan['max_adults'] = $available_room_type['max_adults'];
                                 $available_rate_plans[] = $rate_plan;
                             }
                         }
-
                     }
                 }
-
             }
-            $data['view_data']['check_in_date']             = $check_in_date;
-            $data['view_data']['check_out_date']            = $check_out_date;
-            $data['view_data']['number_of_rooms_requested'] = $number_of_rooms_requested;
-            $data['view_data']['adult_count']               = $adult_count;
-            $data['view_data']['children_count']            = $children_count;
 
-            //sort room_types_available (Again, this is done manually, because the above foreach makes sorting inconsistent)
             ksort($available_rate_plans);
-            $data['view_data']['available_rate_plans'] = $available_rate_plans;
             $date_start     = $check_in_date;
             $date_end       = $check_out_date;
             //Calculate default rates
-            $is_available_rate_plan = false;
+            $is_available_rate_plan = $is_available_room = false;
+            $best_available_rate = -1;
 
-            // fetch rate plan
+            $rate_plan_ids = array();
+            // fetch rate plan description $rate_plan_ids
+
             foreach ($available_rate_plans as $key => $rate_plan) {
 
                 $this->load->library('rate');
@@ -291,15 +291,55 @@ class Online_reservation extends MY_Controller
                 );
 
                 $average_daily_rate = $this->rate->get_average_daily_rate($rate_array);
-
+                $available_rate_plans[$key]['average_daily_rate'] = $average_daily_rate;
+                if ($best_available_rate == -1 || $average_daily_rate < $best_available_rate) {
+                    $best_available_rate = $average_daily_rate;
+                }
+                $rate_plan_ids[] = $rate_plan['rate_plan_id'];
                 if($average_daily_rate > 0 || ($company_data['allow_free_bookings'] && (!$rate_plan['charge_type_id'] || $rate_plan['charge_type_id'] == '0')))
                 {
                     $is_available_rate_plan = true;
                 }
+
+                if($this->Room_model->get_available_rooms(
+                    $check_in_date,
+                    $check_out_date,
+                    $rate_plan['room_type_id'],
+                    null,
+                    $company_id,
+                    1
+                ))
+                {
+                    $is_available_room = true;
+                }
+            }
+
+            $data['view_data']['best_available_rate'] = number_format($best_available_rate, 2, ".", ",");
+
+            $data['view_data']['default_currency'] = $this->Currency_model->get_default_currency($company_id);
+
+            $data['view_data']['check_in_date']             = $check_in_date;
+            $data['view_data']['check_out_date']            = $check_out_date;
+            $data['view_data']['adult_count']               = $adult_count;
+            $data['view_data']['children_count']            = $children_count;
+            $data['view_data']['available_rate_plans']      = $available_rate_plans;
+
+            $data['view_data']['unavailable_room_types']    = $unavailable_room_types;
+
+
+            if (isset($_GET['dev_mode'])) {
+                echo l('session set_userdata: <pre>',true);print_r($data);
             }
 
             $data['view_data']['booking_source'] = $origin;
             $this->session->set_userdata($data);
+
+            if (isset($_GET['dev_mode'])) {
+
+                $session_data = $this->session->all_userdata();
+
+                echo l('Data is all set. get session all_userdata: <pre>',true);print_r($session_data);
+            }
 
             $data['company_data'] = $company_data;
 
@@ -309,34 +349,29 @@ class Online_reservation extends MY_Controller
             unset($data['company_data']['invoice_email_header']);
             unset($data['company_data']['booking_confirmation_email_header']);
 
+            $descriptions = $this->Rate_plan_model->get_rate_plan_descriptions($rate_plan_ids);
+            foreach($data['view_data']['available_rate_plans'] as $key => $rate_plan)
+            {
+                $data['view_data']['available_rate_plans'][$key]['description'] = isset($descriptions[$rate_plan['rate_plan_id']]) ? $descriptions[$rate_plan['rate_plan_id']] : "";
+            }
 
-            if(isset($is_available_rate_plan) && $is_available_rate_plan)
+            foreach($data['view_data']['available_rate_plans'] as $key => $rate_plan)
+            {
+                $room_type_images = $this->Image_model->get_images($rate_plan['room_type_image_group_id']);
+                $data['view_data']['available_rate_plans'][$key]['images']    = $room_type_images;
+            }
+
+            if($is_available_rate_plan && $is_available_room)
             {
                 redirect('/online_reservation/show_reservations/'.$this->uri->segment(3));
             }
             else
             {
                 $data['show_error'] = true;
-                // $data['js_files'] = array(
-                //     base_url().auto_version('js/online_reservations/hotel-datepicker-3.6.5/js/fecha.min.js'),
-                //     base_url().auto_version('js/online_reservations/hotel-datepicker-3.6.5/js/hotel-datepicker.js'),
-                //     base_url().auto_version('js/online-reservation.js'),
-                //     base_url().auto_version('js/online_reservations/eye.js'),
-                //     base_url().auto_version('js/online_reservations/utils.js'),
-                //     base_url().'js/moment.min.js'
-                // );
-
-                // $data['css_files'] = array(
-                //     base_url().auto_version('css/online-reservation.css'),
-                //     base_url().auto_version('js/online_reservations/hotel-datepicker-3.6.5/css/hotel-datepicker.css')
-                // );
-
                 $data['current_step'] = 1;
-                // $data['main_content'] = 'online_reservation/select_dates_and_rooms';
                 $data['selling_date'] = $company_data['selling_date'];
-                // $this->load->view('includes/online_reservation_template', $data);
 
-                  $files = get_asstes_files($this->module_assets_files, $this->module_name, $this->controller_name, $this->function_name);
+                $files = get_asstes_files($this->module_assets_files, $this->module_name, $this->controller_name, $this->function_name);
 
                 $data['main_content'] = '../extensions/'.$this->module_name.'/views/select_dates_and_rooms';
 
@@ -575,7 +610,7 @@ class Online_reservation extends MY_Controller
         }
         else
         {
-            echo json_encode(array('success' => false, 'msg' => l('No rooms available on the selected dates. Please try changing the dates.', true)));
+            echo json_encode(array('success' => false, 'msg' => l('No rooms available on the selected dates. Please try changing the dates.', true), 'avail_rate_plan' => $is_available_rate_plan, 'avail_room' => $is_available_room));
         }
 
     }
@@ -667,7 +702,7 @@ class Online_reservation extends MY_Controller
         }
 
         $data['view_data']['rate_plan_extra'] = $this->input->post('rate_plan_extra');
-
+        
         //Runs this page again until the number of rooms selected == number of rooms requested
         //Information is stored in hidden inputs in the view page
         if (isset($data['view_data']['rate_plan_selected_ids'])) {
@@ -770,7 +805,7 @@ class Online_reservation extends MY_Controller
         $data['view_data']['sub_total']  = $sub_total;
         $data['view_data']['tax_amount'] = $tax_amount = ($sub_total * $total_tax_percentage * 0.01) + $total_flat_rate_tax;
         $data['view_data']['total']      = $data['view_data']['sub_total'] + $data['view_data']['tax_amount'];
-
+        
         $new_array = array();
 
         if($rate_plan_extra && count($rate_plan_extra) > 0){
@@ -790,15 +825,19 @@ class Online_reservation extends MY_Controller
         }
 
         $grand_extra_total = 0;
+        $extra_sub_total = 0;
+        $extra_tax_amount = 0;
+        $extra_charges = 0;
+        
         if($rate_plan_extra && count($rate_plan_extra) > 0){
             $get_amount_only = true;
-            $extra_charges = 0;
+            
             foreach ($rate_plan_extra as $extra) {
 
                 $extra['start_date'] = $data['view_data']['check_in_date'];
                 $extra['end_date'] = $data['view_data']['check_out_date'];
                 $extra['rate'] = $extra['amount'];
-                $extra['quantity'] = $new_array[$extra['extra_id']];
+                $extra['quantity'] = $extra['quantity'];
                 
                 $current_selling_date = $this->Company_model->get_selling_date($company_id);
                 
@@ -830,18 +869,18 @@ class Online_reservation extends MY_Controller
                             {
                                 foreach($tax_rates as $tax){
                                     if(!$tax['is_tax_inclusive']){
-                                        $tax_total += ($extra['rate'] * $tax['tax_rate'] / 100);
+                                        $tax_total += ($extra['rate'] * $extra['quantity'] * $tax['tax_rate'] / 100);
                                     }
                                     
                                 }
                             }
-                            $extra_charges += ($extra['rate'] + $tax_total) * $extra['quantity'];
+                            $extra_charges += ($extra['rate']) * $extra['quantity'];
                         }
                         
-                        $data['view_data']['sub_total'] += $extra['rate'];
-                        $data['view_data']['tax_amount'] += $tax_total;
+                        $extra_sub_total += $extra['rate'];
+                        $extra_tax_amount += $tax_total;
                     }
-                    else
+                    else if($extra['charging_scheme'] == 'once_a_day' && $extra['extra_type'] == 'rental' && strtotime($date_start) < strtotime($date_end))
                     {
                         for ($date = $date_start; $date < $date_end; $date = Date("Y-m-d", strtotime("+1 day", strtotime($date))))
                         {
@@ -861,26 +900,55 @@ class Online_reservation extends MY_Controller
                                 {
                                     foreach ($tax_rates as $tax) {
                                         if (!$tax['is_tax_inclusive']) {
-                                            $tax_total += ($extra['rate'] * $tax['tax_rate'] / 100);
+                                            $tax_total += ($extra['rate'] * $extra['quantity'] * $tax['tax_rate'] / 100);
                                         }
                                     }
                                 }
-                                $extra_charges += ($extra['rate'] + $tax_total) * $extra['quantity'];
+                                $extra_charges += ($extra['rate']) * $extra['quantity'];
                             }
 
-                            $data['view_data']['sub_total'] += $extra['rate'];
-                            $data['view_data']['tax_amount'] += $tax_total;
+                            $extra_sub_total += $extra['rate'];
+                            $extra_tax_amount += $tax_total;
+                        }
+                    } else {
+                        
+                        for ($date = $date_start; $date <= $date_end; $date = Date("Y-m-d", strtotime("+1 day", strtotime($date))))
+                        {
+                            $extra_array[] = array(
+                                "amount"       => $extra['rate'] * $extra['quantity'],
+                                "selling_date" => $date,
+                                "pay_period" => DAILY,
+                                "description" => $extra['extra_name']." (quantity: ".$extra['quantity'].")",
+                                "charge_type_id" => $extra['charge_type_id'],
+                                "charge_type_name" => $extra['extra_name']
+                            );
+                            
+                            if($get_amount_only)
+                            {
+                                $tax_total = 0;
+                                if($tax_rates && count($tax_rates) > 0)
+                                {
+                                    foreach ($tax_rates as $tax) {
+                                        if (!$tax['is_tax_inclusive']) {
+                                            $tax_total += ($extra['rate'] * $extra['quantity'] * $tax['tax_rate'] / 100);
+                                        }
+                                    }
+                                }
+                                $extra_charges += ($extra['rate']) * $extra['quantity'];
+                            }
+
+                            $extra_sub_total += $extra['rate'];
+                            $extra_tax_amount += $tax_total;
                         }
                     }
                 }
             }
-
-            foreach ($rate_plan_extra as $key => $extra) {
-                $data['view_data']['total'] = $data['view_data']['sub_total'] + $data['view_data']['tax_amount'];
-                $grand_extra_total = $extra_charges;
-            }
         }
-        $data['view_data']['grand_total'] = $grand_extra_total;
+
+        $data['view_data']['grand_total'] = $grand_extra_total = $extra_charges ? $extra_charges : 0;
+        $data['view_data']['sub_total'] += $grand_extra_total;
+        $data['view_data']['tax_amount'] += $extra_tax_amount;
+        $data['view_data']['total'] = $data['view_data']['sub_total'] + $data['view_data']['tax_amount'];
 
         $data['view_data']['rate_plan_extra'] = $rate_plan_extra;
 
@@ -907,16 +975,21 @@ class Online_reservation extends MY_Controller
             );
         }
 
-        $this->load->library('form_validation');
+		$data['gateway_credentials']            = $this->paymentgateway->getSelectedGatewayCredentials(1);
+        $gateway_settings                       = $this->paymentgateway->getCompanyGatewaySettings();
+        $data['store_cc_in_booking_engine']     = (bool)$gateway_settings['store_cc_in_booking_engine'];
+        $data['are_gateway_credentials_filled'] = $this->paymentgateway->areGatewayCredentialsFilled();
+
+		$this->load->library('form_validation');
         if(count($data['booking_engine_fields']) > 0):
             foreach ($data['booking_engine_fields'] as $key => $value):
 
                 if($value['id'] == BOOKING_FIELD_NAME){
-                    $name = 'customer-name';
+                    $name = 'customer_name';
                     $is_required = $value['show_on_booking_form'] && $value['is_required'] ? 'required' : '';
                     $error_name = $value['field_name'];
                 } else if($value['id'] == BOOKING_FIELD_EMAIL){
-                    $name = 'customer-email';
+                    $name = 'customer_email';
                     $is_required = $value['show_on_booking_form'] && $value['is_required'] ? 'required' : '';
                     $error_name = $value['field_name'];
                 } else if($value['id'] == BOOKING_FIELD_PHONE){
@@ -940,11 +1013,11 @@ class Online_reservation extends MY_Controller
                     $is_required = $value['show_on_booking_form'] && $value['is_required'] ? 'required' : '';
                     $error_name = $value['field_name'];
                 } else if($value['id'] == BOOKING_FIELD_POSTAL_CODE){
-                    $name = 'postal-code';
+                    $name = 'postal_code';
                     $is_required = $value['show_on_booking_form'] && $value['is_required'] ? 'required' : '';
                     $error_name = $value['field_name'];
                 } else if($value['id'] == BOOKING_FIELD_SPECIAL_REQUEST){
-                    $name = 'special-requests';
+                    $name = 'special_requests';
                     $is_required = $value['show_on_booking_form'] && $value['is_required'] ? 'required' : '';
                     $error_name = $value['field_name'];
                 }
@@ -956,13 +1029,13 @@ class Online_reservation extends MY_Controller
                 );
             endforeach;
         else:
-            $this->form_validation->set_rules(
-                'customer-name',
+			$this->form_validation->set_rules(
+                'customer_name',
                 'Name',
                 'required|trim'
             );
             $this->form_validation->set_rules(
-                'customer-email',
+                'customer_email',
                 'Email',
                 'required|trim|valid_email'
             );
@@ -992,24 +1065,23 @@ class Online_reservation extends MY_Controller
                 'Country',
                 'required|trim'
             );
-            $this->form_validation->set_rules(
-                'postal-code',
+            
+			$this->form_validation->set_rules(
+                'postal_code',
                 'Postal/Zip Code',
                 'trim'
             );
-            $this->form_validation->set_rules(
-                'special-requests',
+			
+			$this->form_validation->set_rules(
+                'special_requests',
                 'Special Requests',
                 'trim'
             );
         endif;
 
-        $data['gateway_credentials']            = $this->paymentgateway->getSelectedGatewayCredentials(1);
-        $gateway_settings                       = $this->paymentgateway->getCompanyGatewaySettings();
-        $data['store_cc_in_booking_engine']     = (bool)$gateway_settings['store_cc_in_booking_engine'];
-        $data['are_gateway_credentials_filled'] = $this->paymentgateway->areGatewayCredentialsFilled();
       
-        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] !== 'nexio'){
+      
+        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] !== 'nexio'  and $gateway_settings['selected_payment_gateway'] !== 'pcibooking'){
             $this->form_validation->set_rules(
                 'cc_number',
                 'CC number',
@@ -1041,13 +1113,16 @@ class Online_reservation extends MY_Controller
 
         if ($this->form_validation->run() == FALSE && $nexio_active == 0) {         
             $data['main_content'] = '../extensions/'.$this->module_name.'/views/book_reservation';
+
             $this->template->load('online_reservation_template', null , $data['main_content'], $data);
 
         }elseif($gateway_settings['selected_payment_gateway'] == 'nexio' && $this->form_validation->run() == FALSE && $nexio_active == 1){
+
             $response = array(
                 'status' => 'error',
                 'message' => "please fill all the required fields."
             );
+
              echo json_encode($response);
         }
          else {
@@ -1056,12 +1131,15 @@ class Online_reservation extends MY_Controller
             //while going through the online reservation process.
             if (!is_null($selected_rooms)) {
 
+                $card_data_array = array();
 
                 $customer_data                  = array();
                 $customer_data['company_id']    = $company_id;
-                $customer_data['customer_name'] = sqli_clean($this->security->xss_clean($this->input->post('customer-name')));
+                // $customer_data['customer_name'] = sqli_clean($this->security->xss_clean($this->input->post('customer-name')));
+				$customer_data['customer_name'] = sqli_clean($this->security->xss_clean($this->input->post('customer_name')));
 
-                $customer_data['email']         = sqli_clean($this->security->xss_clean($this->input->post('customer-email')));
+                // $customer_data['email']         = sqli_clean($this->security->xss_clean($this->input->post('customer-email')));
+				$customer_data['email']         = sqli_clean($this->security->xss_clean($this->input->post('customer_email')));
 
                 $customer_data['customer_type'] = 'PERSON';
 
@@ -1075,7 +1153,7 @@ class Online_reservation extends MY_Controller
 
                 $customer_data['country']       = sqli_clean($this->security->xss_clean($this->input->post('country')));
 
-                $customer_data['postal_code']   = sqli_clean($this->security->xss_clean($this->input->post('postal-code')));
+				$customer_data['postal_code']   = sqli_clean($this->security->xss_clean($this->input->post('postal_code')));
 
                 if ($customer_id = $this->Customer_model->get_customer_id_by_email($customer_data['email'], $company_id)) {
                     $this->Customer_model->update_customer($customer_id, $customer_data);
@@ -1101,8 +1179,8 @@ class Online_reservation extends MY_Controller
                 $cvc = sqli_clean($this->security->xss_clean($this->input->post('cc_cvc')));
 
                 $cc_expiry = explode(' / ', $cc_expiry);
-                $customer_data['cc_expiry_month'] = $cc_expiry_month = $cc_expiry[0] ?? null;
-                $customer_data['cc_expiry_year'] = $cc_expiry_year = $cc_expiry[1] ?? null;
+                $customer_data['cc_expiry_month'] = $cc_expiry_month = isset($cc_expiry[0]) && $cc_expiry[0] ? $cc_expiry[0] : null;
+                $customer_data['cc_expiry_year'] = $cc_expiry_year = isset($cc_expiry[1]) && $cc_expiry[1] ? $cc_expiry[1] : null;
 
                 $card_details = array(
                         'is_primary' => 1,
@@ -1131,7 +1209,9 @@ class Online_reservation extends MY_Controller
                             'cardholder_name'   => (isset($customer_data['customer_name']) ? $customer_data['customer_name'] : ""),
                             'service_code'      => $cvc,
                             'expiration_month'  => isset($customer_data['cc_expiry_month']) ? $customer_data['cc_expiry_month'] : null,
-                            'expiration_year'   => isset($customer_data['cc_expiry_year']) ? $customer_data['cc_expiry_year'] : null
+                            'expiration_year'   => isset($customer_data['cc_expiry_year']) ? $customer_data['cc_expiry_year'] : null,
+							'cc_tokenex_token' => null
+
                         )
                     );
                     $card_response = array();
@@ -1180,34 +1260,9 @@ class Online_reservation extends MY_Controller
                     if(isset($cc_number)){
                         $this->Card_model->create_customer_card_info($card_details);
                     }
+                } else {
+                    $this->Card_model->update_customer_card($check_data['id'], $customer_id, $card_details);
                 }
-
-//                Stripe tokenization lines commented below
-                // if ($token) {
-
-                //     $card_details = array(
-                //         'is_primary' => 1,
-                //         'customer_id' => $customer_id,
-                //         'customer_name' => $customer_data['customer_name'],
-                //         'card_name' => '',
-                //         'company_id' => $customer_data['company_id'],
-                //         'cc_number' => sqli_clean($this->security->xss_clean($this->input->post('masked_card_number'))),
-                //         'cc_expiry_month' => sqli_clean($this->security->xss_clean($this->input->post('cc_expiry_month'))),
-                //         'cc_expiry_year' => sqli_clean($this->security->xss_clean($this->input->post('cc_expiry_year'))),
-                //         'cc_tokenex_token' => $token,
-                //         'cc_cvc_encrypted' => sqli_clean($this->security->xss_clean($this->input->post('cc_cvc_encrypted')))
-                //     );
-
-                //     $is_card = $this->Card_model->get_customer_cards($customer_id);
-                //     if($is_card){
-                //         if($is_card > 0) {
-                //             $this->Card_model->update_customer_primary_card($customer_id, $card_details);
-                //         }
-                //     }else{
-                //         $this->Card_model->create_customer_card_info($card_details);
-                //     }
-                //     $this->Customer_model->update_customer($customer_id, $customer_data);
-                // }
 
                 //Create Booking(s)
                 $bookings = array();
@@ -1229,7 +1284,7 @@ class Online_reservation extends MY_Controller
                     $booking_data['source']              = ($booking_source && $booking_source == 'seasonal.io') ? SOURCE_SEASONAL : SOURCE_ONLINE_WIDGET;
                     $booking_data['company_id']          = $company_id;
                     $booking_data['booking_customer_id'] = $customer_id;
-                    $booking_data['booking_notes']       = sqli_clean($this->security->xss_clean($this->input->post('special-requests')));
+					$booking_data['booking_notes']       = sqli_clean($this->security->xss_clean($this->input->post('special_requests')));
 
 
                     // extras in booking notes
@@ -1246,7 +1301,7 @@ class Online_reservation extends MY_Controller
 
                         foreach ($rate_plan_extra as $key => $extra) {
                             if(!in_array($extra['extra_id'], $prev_extras)) {
-                                $booking_data['booking_notes'] .= $extra['extra_name']." (Amount: ".$extra['amount'].", Qty: ".$new_array[$extra['extra_id']].")\n";
+                                $booking_data['booking_notes'] .= $extra['extra_name']." (Amount: ".$extra['amount'].", Qty: ".$extra['quantity'].")\n";
                                 $prev_extras[] = $extra['extra_id'];
                             }
                         }
@@ -1297,7 +1352,7 @@ class Online_reservation extends MY_Controller
                             $extra_data['extra_id'] = $extra['extra_id'];
                             $extra_data['start_date'] = $data['view_data']['check_in_date'];
                             $extra_data['end_date'] = $data['view_data']['check_out_date'];
-                            $extra_data['quantity'] = $new_array[$extra['extra_id']];
+                            $extra_data['quantity'] = $extra['quantity'];
 
                             if(!in_array($extra['extra_id'], $prev_extra_data)){
                                 $this->create_booking_extra_AJAX($booking_id, $extra_data, $selling_date);
@@ -1485,25 +1540,49 @@ class Online_reservation extends MY_Controller
 
                 
                   // $this->template->load('includes/online_reservation_template', null , $data['main_content'], $data);
-             
-                    
-
                 $this->session->set_userdata($data);
-
                 if($gateway_settings['selected_payment_gateway'] == 'nexio' && $nexio_active == 1){
                     $res = array(
                         'customer_id' => $customer_id,
                         "url" => 'online_reservation/reservation_success/'.$this->uri->segment(3)
                     );
+	
+
                     echo json_encode($res);
                   
-                }else{
+                }
+				elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $this->is_pci_booking_enabled == true){
+
+					$customer_card__data = $this->input->post();
+					$customer_card__data['meta_data']['pci_token'] = $customer_card__data['customer_data']['cc_token'];
+					$customer_card__data['meta_data']['source'] = "pci_booking";
+
+					$data = [];
+					$data['cc_number'] = $customer_card__data['customer_data']['cc_number'];
+					$data['cc_expiry_month'] = $customer_card__data['customer_data']['cc_expiry_month'];
+					$data['cc_expiry_year'] = $customer_card__data['customer_data']['cc_expiry_year'];
+
+					$data['customer_meta_data'] = json_encode($customer_card__data['meta_data']);
+
+					$this->load->model('Card_model');
+
+					$customer_card__data = $this->Card_model->update_customer_primary_card($customer_id, $data);
+					$res = array(
+						"url" => 'online_reservation/reservation_success/'.$this->uri->segment(3)
+					);
+					echo json_encode($res);
+			    }
+				else{
+
                     redirect('/online_reservation/reservation_success/'.$this->uri->segment(3)); 
+					
                 }  
 
             } else {
                 echo l('We\'re sorry. The rooms you selected are no longer available. Please start over and select new rooms.', true);
             }
+
+			
         }
     }
 
@@ -1687,7 +1766,7 @@ class Online_reservation extends MY_Controller
         // Call function to load translation of language
         load_translations($language_id);
 
-        echo l('success', true);
+        echo 'success';
         return;
     }
 

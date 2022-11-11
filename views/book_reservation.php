@@ -117,14 +117,21 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                 <?php echo l('check_in_date'); ?>::
             </dt>
             <dd>
-                <?php echo $view_data['check_in_date']; ?>
+                <?php echo get_local_formatted_date($view_data['check_in_date'], $company_data['date_format']); ?>
             </dd>
 
             <dt>
                 <?php echo l('Check-out Date'); ?>:
             </dt>
             <dd>
-                <?php echo $view_data['check_out_date']; ?>
+                <?php echo get_local_formatted_date($view_data['check_out_date'], $company_data['date_format']); ?>
+            </dd>
+
+            <dt>
+                <?php echo l('Number of Days', true); ?>:
+            </dt>
+            <dd>
+                <?php echo intval((strtotime($view_data['check_out_date']) - strtotime($view_data['check_in_date']))/(3600*24)); ?>
             </dd>
 
             <dt>
@@ -210,7 +217,7 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                                         <td><?php echo $extra['extra_name']; ?></td>
                                         <td style="float: right;"><?php echo $extra['amount']; ?></td>
                                         <td style="float: left;margin-left: 57px;">
-                                            <?php echo $new_array[$extra['extra_id']]; ?>
+                                            <?php echo $extra['quantity']; ?>
                                         </td>
                                     </tr>
                                     <?php $prev_extras[] = $extra['extra_id']; endif; endforeach; ?>
@@ -353,7 +360,11 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                         <input type="hidden" name="store_cc_in_booking_engine" id="store_cc_in_booking_engine" value="<?php echo $store_cc_in_booking_engine; ?>">
                         <input type="hidden" name="are_gateway_credentials_filled" id="are_gateway_credentials_filled" value="<?php echo $are_gateway_credentials_filled; ?>">
 
+<<<<<<< HEAD
 					<?php if ($store_cc_in_booking_engine and $are_gateway_credentials_filled and $view_data['gateway_settings']['selected_payment_gateway'] == 'pcibooking') : ?>
+=======
+					<?php if ($store_cc_in_booking_engine and $are_gateway_credentials_filled and $this->company_data['selected_payment_gateway'] == 'pcibooking' and $this->is_pci_booking_enabled == true) : ?>
+>>>>>>> d8737eb58226a41e4d9503c61e4dcdbb3da5a2d4
 						<div class="col-sm-9 add_card_details"></div>
                     <?php elseif ($store_cc_in_booking_engine and $are_gateway_credentials_filled): ?>
                         
@@ -450,6 +461,7 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                      if(isset($this->module_assets_files['nexio_integration']) && $view_data['gateway_settings']['selected_payment_gateway'] =='nexio'){?>
                         <input type="hidden" value='0' name='nexio_active' id='nexio_active' class='nexio_active'>
                         <input type="button" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right" id="booking_engine_form"/>
+<<<<<<< HEAD
                     <?php } else if (
                         $store_cc_in_booking_engine and 
                         $are_gateway_credentials_filled and 
@@ -457,6 +469,9 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                             ($view_data['gateway_settings']['selected_payment_gateway'] == 'pcibooking')
                              || $view_data['gateway_settings']['selected_payment_gateway'] == 'kovena')
                          ){  ?>
+=======
+                    <?php } else if ($store_cc_in_booking_engine and $are_gateway_credentials_filled and $this->company_data['selected_payment_gateway'] == 'pcibooking' and $this->is_pci_booking_enabled == true){  ?>
+>>>>>>> d8737eb58226a41e4d9503c61e4dcdbb3da5a2d4
 						<input type="button" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right book_now" />
                     <?php }else{?>
                         <input type="submit" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right" />

@@ -1,8 +1,11 @@
 
 <div class="container">
-	<?php echo l('The online reservation has been requested to'); ?> <?php echo $company_data['name']; ?>. <?php echo l('Please check your email inbox for a Booking Confirmation email.'); ?>
+	<?php echo l('The online reservation has been requested to', true); ?> <?php echo $company_data['name']; ?>. 
+	<?php if(isset($company_data['email_confirmation_for_booking_engine']) && !$company_data['email_confirmation_for_booking_engine']){
+        	echo l('Please check your email inbox for a booking confirmation email.', true); 
+        } ?>
 	<br/><br/>
-	<?php echo l('For inquiries, please contact us at'); ?>: <?php echo $company_data['phone']; ?>
+	<?php echo l('For inquiries, please contact us at', true); ?>: <?php echo $company_data['phone']; ?>
 	<br/><br/>
 	
 	<?php
