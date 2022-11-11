@@ -360,11 +360,9 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                         <input type="hidden" name="store_cc_in_booking_engine" id="store_cc_in_booking_engine" value="<?php echo $store_cc_in_booking_engine; ?>">
                         <input type="hidden" name="are_gateway_credentials_filled" id="are_gateway_credentials_filled" value="<?php echo $are_gateway_credentials_filled; ?>">
 
-<<<<<<< HEAD
-					<?php if ($store_cc_in_booking_engine and $are_gateway_credentials_filled and $view_data['gateway_settings']['selected_payment_gateway'] == 'pcibooking') : ?>
-=======
+
 					<?php if ($store_cc_in_booking_engine and $are_gateway_credentials_filled and $this->company_data['selected_payment_gateway'] == 'pcibooking' and $this->is_pci_booking_enabled == true) : ?>
->>>>>>> d8737eb58226a41e4d9503c61e4dcdbb3da5a2d4
+
 						<div class="col-sm-9 add_card_details"></div>
                     <?php elseif ($store_cc_in_booking_engine and $are_gateway_credentials_filled): ?>
                         
@@ -461,17 +459,9 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                      if(isset($this->module_assets_files['nexio_integration']) && $view_data['gateway_settings']['selected_payment_gateway'] =='nexio'){?>
                         <input type="hidden" value='0' name='nexio_active' id='nexio_active' class='nexio_active'>
                         <input type="button" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right" id="booking_engine_form"/>
-<<<<<<< HEAD
-                    <?php } else if (
-                        $store_cc_in_booking_engine and 
-                        $are_gateway_credentials_filled and 
-                        (
-                            ($view_data['gateway_settings']['selected_payment_gateway'] == 'pcibooking')
-                             || $view_data['gateway_settings']['selected_payment_gateway'] == 'kovena')
-                         ){  ?>
-=======
+
                     <?php } else if ($store_cc_in_booking_engine and $are_gateway_credentials_filled and $this->company_data['selected_payment_gateway'] == 'pcibooking' and $this->is_pci_booking_enabled == true){  ?>
->>>>>>> d8737eb58226a41e4d9503c61e4dcdbb3da5a2d4
+
 						<input type="button" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right book_now" />
                     <?php }else{?>
                         <input type="submit" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right" />
