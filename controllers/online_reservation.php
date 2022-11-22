@@ -1573,6 +1573,16 @@ class Online_reservation extends MY_Controller
 					echo json_encode($res);
 			    }
                 elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] == 'kovena'){
+                    
+
+                    $cust_card_data = $this->input->post('customer_data');
+
+                    $customer_card_data['customer_data'] = $customer_data;
+                    $customer_card_data['customer_data']['kovena_vault_token'] = $cust_card_data['kovena_vault_token'];
+                    $customer_card_data['customer_data']['customer_id'] = $customer_id;
+                    $customer_card_data['customer_data']['customer_notes'] = '';
+                    $pci_customer_response = apply_filters('post.build.customer', $customer_card_data);
+
                     $res = array(
                         "url" => 'online_reservation/reservation_success/'.$this->uri->segment(3)
                     );
