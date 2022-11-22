@@ -1081,7 +1081,7 @@ class Online_reservation extends MY_Controller
 
       
       
-        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] !== 'nexio'  and $gateway_settings['selected_payment_gateway'] !== 'pcibooking'){
+        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] !== 'nexio' and $gateway_settings['selected_payment_gateway'] !== 'pcibooking' and $gateway_settings['selected_payment_gateway'] !== 'kovena'){
             $this->form_validation->set_rules(
                 'cc_number',
                 'CC number',
@@ -1342,7 +1342,7 @@ class Online_reservation extends MY_Controller
 
                     do_action('post.create.booking', $post_booking_data);
 
-                     do_action('post.add.booking', $booking_action_data);
+                    do_action('post.add.booking', $booking_action_data);
 
                     $selling_date = $this->Company_model->get_selling_date($company_id);
 
@@ -1572,6 +1572,12 @@ class Online_reservation extends MY_Controller
 					);
 					echo json_encode($res);
 			    }
+                elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] == 'kovena'){
+                    $res = array(
+                        "url" => 'online_reservation/reservation_success/'.$this->uri->segment(3)
+                    );
+                    echo json_encode($res);
+                }
 				else{
 
                     redirect('/online_reservation/reservation_success/'.$this->uri->segment(3)); 
