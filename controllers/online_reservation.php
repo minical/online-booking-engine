@@ -1452,7 +1452,7 @@ class Online_reservation extends MY_Controller
                     $this->Booking_model->update_booking_balance($booking_id);
 
                     $log_data['selling_date'] = $selling_date;
-                    $log_data['user_id']      = 2; //User_id 2 is Online Reservation
+                    $log_data['user_id']      = 0; //User_id 2 is Online Reservation
                     $log_data['booking_id']   = $booking_id;
                     $log_data['date_time']    = gmdate('Y-m-d H:i:s');
                     $log_data['log']          = 'Online reservation submitted';
@@ -1501,7 +1501,7 @@ class Online_reservation extends MY_Controller
                     {
                         $log_data = array();
                         $log_data['selling_date'] = $this->Company_model->get_selling_date($company_id);
-                        $log_data['user_id']      = 2; //User_id 2 is Online Reservation
+                        $log_data['user_id']      = 0; //User_id 2 is Online Reservation
                         $log_data['booking_id']   = $booking_id;
                         $log_data['date_time']    = gmdate('Y-m-d H:i:s');
                         $log_data['log']          = 'Automatic Confirmation Email Sent to '.$result_array['customer_email'];
