@@ -360,8 +360,10 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                         <input type="hidden" name="store_cc_in_booking_engine" id="store_cc_in_booking_engine" value="<?php echo $store_cc_in_booking_engine; ?>">
                         <input type="hidden" name="are_gateway_credentials_filled" id="are_gateway_credentials_filled" value="<?php echo $are_gateway_credentials_filled; ?>">
 
-					<?php if ($store_cc_in_booking_engine and $are_gateway_credentials_filled and $view_data['gateway_settings']['selected_payment_gateway'] == 'pcibooking') : ?>
+                    <?php if ($store_cc_in_booking_engine and $are_gateway_credentials_filled and $view_data['gateway_settings']['selected_payment_gateway'] == 'pcibooking' and  $this->is_pci_booking_enabled) : ?>
 						<div class="col-sm-9 add_card_details"></div>
+                    <?php elseif ($store_cc_in_booking_engine and $are_gateway_credentials_filled and $view_data['gateway_settings']['selected_payment_gateway'] == 'cardknox' and  $this->is_cardknox_enabled ) : ?>
+                        <div class="col-sm-9 add_cardknox_details"></div>
                     <?php elseif ($store_cc_in_booking_engine and $are_gateway_credentials_filled): ?>
                         
                         <div class="form-group cc_details">
@@ -462,14 +464,21 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                         $are_gateway_credentials_filled and 
                         (
                             ($view_data['gateway_settings']['selected_payment_gateway'] == 'pcibooking')
-                             || $view_data['gateway_settings']['selected_payment_gateway'] == 'kovena')
+                             || $view_data['gateway_settings']['selected_payment_gateway'] == 'kovena'
+                             || $view_data['gateway_settings']['selected_payment_gateway'] == 'cardknox')
+
+                             and (
+                                ( isset($this->is_pcibooking_enabled) && $this->is_pcibooking_enabled)
+                                 || ( isset($this->is_kovena_enabled) && $this->is_kovena_enabled)
+                                 || ( isset($this->is_cardknox_enabled) && $this->is_cardknox_enabled) )
+                              
                          ){  ?>
 						<input type="button" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right book_now" />
                     <?php }else{?>
                         <input type="submit" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right" />
 
                     <?php }?>
-                    <input type="hidden" name="company_id" id="company_id" value="<?php echo $company_data['company_id']; ?>">
+                    <input type="hidden" name="compamy_id" id="compamy_id" value="<?php echo $company_data['id']; ?>">
                 </form>
             </div>
         </div>

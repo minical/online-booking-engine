@@ -975,12 +975,12 @@ class Online_reservation extends MY_Controller
             );
         }
 
-		$data['gateway_credentials']            = $this->paymentgateway->getSelectedGatewayCredentials(1);
+        $data['gateway_credentials']            = $this->paymentgateway->getSelectedGatewayCredentials(1);
         $gateway_settings                       = $this->paymentgateway->getCompanyGatewaySettings();
         $data['store_cc_in_booking_engine']     = (bool)$gateway_settings['store_cc_in_booking_engine'];
         $data['are_gateway_credentials_filled'] = $this->paymentgateway->areGatewayCredentialsFilled();
 
-		$this->load->library('form_validation');
+        $this->load->library('form_validation');
         if(count($data['booking_engine_fields']) > 0):
             foreach ($data['booking_engine_fields'] as $key => $value):
 
@@ -1029,7 +1029,7 @@ class Online_reservation extends MY_Controller
                 );
             endforeach;
         else:
-			$this->form_validation->set_rules(
+            $this->form_validation->set_rules(
                 'customer_name',
                 'Name',
                 'required|trim'
@@ -1066,13 +1066,13 @@ class Online_reservation extends MY_Controller
                 'required|trim'
             );
             
-			$this->form_validation->set_rules(
+            $this->form_validation->set_rules(
                 'postal_code',
                 'Postal/Zip Code',
                 'trim'
             );
-			
-			$this->form_validation->set_rules(
+            
+            $this->form_validation->set_rules(
                 'special_requests',
                 'Special Requests',
                 'trim'
@@ -1080,8 +1080,7 @@ class Online_reservation extends MY_Controller
         endif;
 
       
-      
-        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] !== 'nexio' and $gateway_settings['selected_payment_gateway'] !== 'pcibooking' and $gateway_settings['selected_payment_gateway'] !== 'kovena'){
+        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] !== 'nexio' and $gateway_settings['selected_payment_gateway'] !== 'pcibooking' and $gateway_settings['selected_payment_gateway'] !== 'kovena' and $gateway_settings['selected_payment_gateway'] !== 'cardknox'){
             $this->form_validation->set_rules(
                 'cc_number',
                 'CC number',
@@ -1111,7 +1110,7 @@ class Online_reservation extends MY_Controller
 
         $nexio_active = sqli_clean($this->security->xss_clean($this->input->post('nexio_active')));
 
-        if ($this->form_validation->run() == FALSE && $nexio_active == 0) {         
+        if ($this->form_validation->run() == FALSE && $nexio_active == 0) {  
             $data['main_content'] = '../extensions/'.$this->module_name.'/views/book_reservation';
 
             $this->template->load('online_reservation_template', null , $data['main_content'], $data);
@@ -1136,10 +1135,10 @@ class Online_reservation extends MY_Controller
                 $customer_data                  = array();
                 $customer_data['company_id']    = $company_id;
                 // $customer_data['customer_name'] = sqli_clean($this->security->xss_clean($this->input->post('customer-name')));
-				$customer_data['customer_name'] = sqli_clean($this->security->xss_clean($this->input->post('customer_name')));
+                $customer_data['customer_name'] = sqli_clean($this->security->xss_clean($this->input->post('customer_name')));
 
                 // $customer_data['email']         = sqli_clean($this->security->xss_clean($this->input->post('customer-email')));
-				$customer_data['email']         = sqli_clean($this->security->xss_clean($this->input->post('customer_email')));
+                $customer_data['email']         = sqli_clean($this->security->xss_clean($this->input->post('customer_email')));
 
                 $customer_data['customer_type'] = 'PERSON';
 
@@ -1153,7 +1152,7 @@ class Online_reservation extends MY_Controller
 
                 $customer_data['country']       = sqli_clean($this->security->xss_clean($this->input->post('country')));
 
-				$customer_data['postal_code']   = sqli_clean($this->security->xss_clean($this->input->post('postal_code')));
+                $customer_data['postal_code']   = sqli_clean($this->security->xss_clean($this->input->post('postal_code')));
 
                 if ($customer_id = $this->Customer_model->get_customer_id_by_email($customer_data['email'], $company_id)) {
                     $this->Customer_model->update_customer($customer_id, $customer_data);
@@ -1210,7 +1209,7 @@ class Online_reservation extends MY_Controller
                             'service_code'      => $cvc,
                             'expiration_month'  => isset($customer_data['cc_expiry_month']) ? $customer_data['cc_expiry_month'] : null,
                             'expiration_year'   => isset($customer_data['cc_expiry_year']) ? $customer_data['cc_expiry_year'] : null,
-							'cc_tokenex_token' => null
+                            'cc_tokenex_token' => null
 
                         )
                     );
@@ -1284,7 +1283,7 @@ class Online_reservation extends MY_Controller
                     $booking_data['source']              = ($booking_source && $booking_source == 'seasonal.io') ? SOURCE_SEASONAL : SOURCE_ONLINE_WIDGET;
                     $booking_data['company_id']          = $company_id;
                     $booking_data['booking_customer_id'] = $customer_id;
-					$booking_data['booking_notes']       = sqli_clean($this->security->xss_clean($this->input->post('special_requests')));
+                    $booking_data['booking_notes']       = sqli_clean($this->security->xss_clean($this->input->post('special_requests')));
 
 
                     // extras in booking notes
@@ -1538,7 +1537,7 @@ class Online_reservation extends MY_Controller
                     'total'                                 => $data['view_data']['total']
                 );
 
-                
+           
                   // $this->template->load('includes/online_reservation_template', null , $data['main_content'], $data);
                 $this->session->set_userdata($data);
                 if($gateway_settings['selected_payment_gateway'] == 'nexio' && $nexio_active == 1){
@@ -1546,59 +1545,81 @@ class Online_reservation extends MY_Controller
                         'customer_id' => $customer_id,
                         "url" => 'online_reservation/reservation_success/'.$this->uri->segment(3)
                     );
-	
+    
 
                     echo json_encode($res);
                   
                 }
-				elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $this->is_pci_booking_enabled == true){
+                elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $this->is_pci_booking_enabled == true){
 
-					$customer_card__data = $this->input->post();
-					$customer_card__data['meta_data']['pci_token'] = $customer_card__data['customer_data']['cc_token'];
-					$customer_card__data['meta_data']['source'] = "pci_booking";
+                    $customer_card__data = $this->input->post();
+                    $customer_card__data['meta_data']['pci_token'] = $customer_card__data['customer_data']['cc_token'];
+                    $customer_card__data['meta_data']['source'] = "pci_booking";
 
-					$data = [];
-					$data['cc_number'] = $customer_card__data['customer_data']['cc_number'];
-					$data['cc_expiry_month'] = $customer_card__data['customer_data']['cc_expiry_month'];
-					$data['cc_expiry_year'] = $customer_card__data['customer_data']['cc_expiry_year'];
+                    $data = [];
+                    $data['cc_number'] = $customer_card__data['customer_data']['cc_number'];
+                    $data['cc_expiry_month'] = $customer_card__data['customer_data']['cc_expiry_month'];
+                    $data['cc_expiry_year'] = $customer_card__data['customer_data']['cc_expiry_year'];
 
-					$data['customer_meta_data'] = json_encode($customer_card__data['meta_data']);
+                    $data['customer_meta_data'] = json_encode($customer_card__data['meta_data']);
 
-					$this->load->model('Card_model');
+                    $this->load->model('Card_model');
 
-					$customer_card__data = $this->Card_model->update_customer_primary_card($customer_id, $data);
-					$res = array(
-						"url" => 'online_reservation/reservation_success/'.$this->uri->segment(3)
-					);
-					echo json_encode($res);
-			    }
-                elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] == 'kovena'){
-                    
-
-                    $cust_card_data = $this->input->post('customer_data');
-
-                    $customer_card_data['customer_data'] = $customer_data;
-                    $customer_card_data['customer_data']['kovena_vault_token'] = $cust_card_data['kovena_vault_token'];
-                    $customer_card_data['customer_data']['customer_id'] = $customer_id;
-                    $customer_card_data['customer_data']['customer_notes'] = '';
-                    $pci_customer_response = apply_filters('post.build.customer', $customer_card_data);
-
+                    $customer_card__data = $this->Card_model->update_customer_primary_card($customer_id, $data);
                     $res = array(
                         "url" => 'online_reservation/reservation_success/'.$this->uri->segment(3)
                     );
                     echo json_encode($res);
                 }
-				else{
+                elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $this->is_cardknox_enabled == true){
+
+                    $customer_card__data = $this->input->post();
+                    // prx($customer_card__data); die;
+
+                    $customer_card__data['meta_data']['cardknox_token'] = $customer_card__data['customer_data']['cc_token'];
+                    $customer_card__data['meta_data']['customerCvvToken'] = $customer_card__data['customer_data']['customerCvvToken'];
+                    $customer_card__data['meta_data']['source'] = "cardknox";
+                    
+                    $data = [];
+                    $data['cc_number'] = $customer_card__data['customer_data']['cc_number'];
+                    $data['cc_expiry_month'] = $customer_card__data['customer_data']['cc_expiry_month'];
+                    $data['cc_expiry_year'] = $customer_card__data['customer_data']['cc_expiry_year'];
+
+                    $data['customer_meta_data'] = json_encode($customer_card__data['meta_data']);
+
+                    $this->load->model('Card_model');
+
+                    $customer_card__data = $this->Card_model->update_customer_primary_card($customer_id, $data);
+                    $session_data = $this->session->all_userdata();
+
+                    // prx($session_data); die;
+
+                    $res = array(
+                        "url" => 'online_reservation/reservation_success/'.$this->uri->segment(3),
+                        "session_data" => $session_data
+                    );
+                    // prx($res); die;
+                    echo json_encode($res);
+                    // redirect('/online_reservation/reservation_success/'.$this->uri->segment(3)); 
+                     
+                }
+                elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] == 'kovena'){
+                    $res = array(
+                        "url" => 'online_reservation/reservation_success/'.$this->uri->segment(3)
+                    );
+                    echo json_encode($res);
+                }
+                else{
 
                     redirect('/online_reservation/reservation_success/'.$this->uri->segment(3)); 
-					
+                    
                 }  
 
             } else {
                 echo l('We\'re sorry. The rooms you selected are no longer available. Please start over and select new rooms.', true);
             }
 
-			
+            
         }
     }
 
