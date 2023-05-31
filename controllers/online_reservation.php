@@ -1080,7 +1080,7 @@ class Online_reservation extends MY_Controller
         endif;
 
       
-        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] !== 'nexio' and $gateway_settings['selected_payment_gateway'] !== 'pcibooking' and $gateway_settings['selected_payment_gateway'] !== 'kovena' and $gateway_settings['selected_payment_gateway'] !== 'cardknox'){
+        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] !== 'nexio' and $gateway_settings['selected_payment_gateway'] !== 'pcibooking' and $gateway_settings['selected_payment_gateway'] !== 'kovena' and $gateway_settings['selected_payment_gateway'] !== 'cardknox'and $gateway_settings['selected_payment_gateway'] !=='nestpay'){
             $this->form_validation->set_rules(
                 'cc_number',
                 'CC number',
@@ -1608,6 +1608,10 @@ class Online_reservation extends MY_Controller
                         "url" => 'online_reservation/reservation_success/'.$this->uri->segment(3)
                     );
                     echo json_encode($res);
+                }
+                elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] == 'nestpay'){
+                    
+                    redirect('/public/get_nestpay_post_bookingengine/'.$company_id.'/'.$booking_id);
                 }
                 else{
 
