@@ -467,6 +467,11 @@ class Online_reservation extends MY_Controller
                         $passed_all_restrictions = true;
 
                         foreach ($rates as $rate) {
+
+                            if($company_id == 2643 && $rate['adult_'.$adult_count.'_rate'] == '') {
+                                $passed_all_restrictions = false;
+                            }
+
                             if ($rate['can_be_sold_online'] != '1') {
                                 $passed_all_restrictions = false;
                             }
