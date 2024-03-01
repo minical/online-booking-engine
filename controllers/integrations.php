@@ -7,7 +7,7 @@ class Integrations extends MY_Controller
     
      public $module_name;
     function __construct()
-	{
+    {
 
         parent::__construct();
          $this->module_name = $this->router->fetch_module();
@@ -22,17 +22,17 @@ class Integrations extends MY_Controller
         $this->load->model('../extensions/'.$this->module_name.'/models/Payment_gateway_model');
         $this->load->library('Integrations/roomsy_channel_manager');
         
-		$view_data['menu_on'] = true;       
-		$view_data['integrations_enabled'] = ($this->company_subscription_level == PREMIUM || $this->company_subscription_level == ELITE ) ? true : false;
-		$this->load->vars($view_data);
-	}
+        $view_data['menu_on'] = true;       
+        $view_data['integrations_enabled'] = ($this->company_subscription_level == PREMIUM || $this->company_subscription_level == ELITE ) ? true : false;
+        $this->load->vars($view_data);
+    }
     
  //    function index() 
-	// {
-	// 	redirect('/settings/integrations/booking_engine', 'refresh');
-	// }
-	
-	function _create_integration_log($log) {
+    // {
+    //  redirect('/settings/integrations/booking_engine', 'refresh');
+    // }
+    
+    function _create_integration_log($log) {
         $log_detail =  array(
                     "user_id" => $this->user_id,
                     "selling_date" => $this->selling_date,
@@ -44,10 +44,10 @@ class Integrations extends MY_Controller
     }
     
     function booking_engine()
-	{
-		$view_data = array();
+    {
+        $view_data = array();
 
-		//-----------------------------------------------------
+        //-----------------------------------------------------
 
         $view_data['company_data'] = $this->Company_model->get_company($this->company_id);
         // $view_data['booking_fields'] = $this->Company_model->get_booking_engine_fields($this->company_id);
@@ -95,6 +95,16 @@ class Integrations extends MY_Controller
                         'store_cc_in_booking_engine' => $store_cc_in_booking_engine
                     )
                 );
+            } else {
+                $this->Payment_gateway_model->update_payment_gateway_settings(
+                    array(
+                        'company_id'                 => $this->company_id,
+                        'store_cc_in_booking_engine' => $store_cc_in_booking_engine,
+                        'selected_payment_gateway' => 'stripe',
+                        'stripe_secret_key' => 'stripe',
+                        'stripe_publishable_key' => 'stripe'
+                    )
+                );
             }
 
             $company_data = array(
@@ -110,18 +120,18 @@ class Integrations extends MY_Controller
 
 
             $this->Company_model->update_company($this->company_id, $company_data);
-			$this->_create_integration_log("Update Booking Engine Setting");
+            $this->_create_integration_log("Update Booking Engine Setting");
             redirect('/integrations/booking_engine');
             // exit; // itodo possibly unnecessary
-		}
+        }
 
         $files = get_asstes_files($this->module_assets_files, $this->module_name, $this->controller_name, $this->function_name);
  
         $view_data['main_content'] = '../extensions/'.$this->module_name.'/views/online_reservation_settings';
 
         $this->template->load('bootstrapped_template', null , $view_data['main_content'], $view_data);
-		
-	}
+        
+    }
 
     function update_booking_engine_fields()
     {
@@ -186,7 +196,7 @@ class Integrations extends MY_Controller
 
     function roomsy_channel_manager($action = null, $ota_id = null)
     {
-		$view_data['company_data'] = $this->Company_model->get_company($this->company_id);
+        $view_data['company_data'] = $this->Company_model->get_company($this->company_id);
         //echo '<pre>'; print_r($view_data['company_data']);echo '</pre>';
         if($action === 'manage')
         {
@@ -270,11 +280,11 @@ class Integrations extends MY_Controller
     
     function unconfirmed_reservations() {
         $view_data['company_data'] = $this->Company_model->get_company($this->company_id);
-		$view_data['js_files'] = array(base_url() . auto_version('js/hotel-settings/online-settings.js'));
-		$view_data['selected_sidebar_link'] = 'Unconfirmed Reservations';
-		$view_data['main_content'] = 'hotel_settings/channel_manager/unconfirmed_reservations';
-		$this->load->view('includes/bootstrapped_template', $view_data);
-	}
+        $view_data['js_files'] = array(base_url() . auto_version('js/hotel-settings/online-settings.js'));
+        $view_data['selected_sidebar_link'] = 'Unconfirmed Reservations';
+        $view_data['main_content'] = 'hotel_settings/channel_manager/unconfirmed_reservations';
+        $this->load->view('includes/bootstrapped_template', $view_data);
+    }
     function update_unconfirmed_reservations_AJAX() {
         if ($this->input->post()) {
             $company_data = array(
@@ -283,9 +293,9 @@ class Integrations extends MY_Controller
             $this->Company_model->update_company($this->company_id, $company_data);
             echo json_encode(array('status' => true));
             return;
-		}
+        }
         echo json_encode(array('status' => false));
-	}
+    }
     
     function configure_roomsy_channel_manager_AJAX()
     {  
@@ -293,9 +303,9 @@ class Integrations extends MY_Controller
             return;
         }
         $data = $this->input->post('data');
-		$channel_data = $this->Channel_model->get_all_channels($data['ota_id']);
-		$channel_name = (isset($channel_data[0]) && isset($channel_data[0]['name'])) ?  $channel_data[0]['name'] : '';
-		$this->_create_integration_log("Configure OTA ( $channel_name )");
+        $channel_data = $this->Channel_model->get_all_channels($data['ota_id']);
+        $channel_name = (isset($channel_data[0]) && isset($channel_data[0]['name'])) ?  $channel_data[0]['name'] : '';
+        $this->_create_integration_log("Configure OTA ( $channel_name )");
         $company = $this->Company_model->get_company($this->company_id);
         $response = $this->roomsy_channel_manager->configure_ota($company, $data);
         echo json_encode($response);
@@ -306,9 +316,9 @@ class Integrations extends MY_Controller
             return;
         }
         $ota_id = $this->input->post('ota_id');
-		$channel_data = $this->Channel_model->get_all_channels($ota_id);
-		$channel_name = (isset($channel_data[0]) && isset($channel_data[0]['name'])) ? $channel_data[0]['name'] : '';
-		$this->_create_integration_log("Deconfigure OTA ( $channel_name )");
+        $channel_data = $this->Channel_model->get_all_channels($ota_id);
+        $channel_name = (isset($channel_data[0]) && isset($channel_data[0]['name'])) ? $channel_data[0]['name'] : '';
+        $this->_create_integration_log("Deconfigure OTA ( $channel_name )");
         $response = $this->roomsy_channel_manager->deconfigure_ota($this->company_id, $ota_id);
         echo json_encode($response);
     }    
@@ -324,7 +334,7 @@ class Integrations extends MY_Controller
     }
     
     function save_links($ota_id)
-	{	
+    {   
         if($this->company_subscription_level == BASIC){
             return;
         }
@@ -370,7 +380,7 @@ class Integrations extends MY_Controller
         
         $response = $this->roomsy_channel_manager->save_links($data);       
         echo json_encode($response);
-	}
+    }
     
     
     function myallocator($action = null, $ota_id = null)
@@ -512,7 +522,7 @@ class Integrations extends MY_Controller
         );
         
         $view_data['main_content'] = 'hotel_settings/channel_manager/ical_calendar';
-		$this->load->view('includes/bootstrapped_template', $view_data);
+        $this->load->view('includes/bootstrapped_template', $view_data);
     }
          
     function save_ical_mapping_AJAX()
@@ -524,7 +534,7 @@ class Integrations extends MY_Controller
     
     /* Payment Type Settings */
     function payment_gateways()
-    {		
+    {       
             $data['selected_sidebar_link'] = 'Payment Gateways';
             $data['main_content'] = 'hotel_settings/accounting_settings/payment_gateway_settings';
             $data['js_files'] = array(
@@ -607,7 +617,7 @@ class Integrations extends MY_Controller
         {
             $view_data['js_files'] = array(
                 base_url() . auto_version('js/channel_manager/channel_manager.js')
-			);
+            );
             $view_data['siteminder'] = $this->roomsy_channel_manager->get_otas($view_data['company_data']['company_id']);
             $view_data['main_content'] = 'hotel_settings/channel_manager/siteminder';
         }
