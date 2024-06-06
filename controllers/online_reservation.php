@@ -1616,6 +1616,7 @@ class Online_reservation extends MY_Controller
                     echo json_encode($res);
                 }
                 elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] == 'nestpay'){
+                    $this->Booking_model->delete_booking($booking_id);
                     
                     redirect('/public/get_nestpay_post_bookingengine/'.$company_id.'/'.$booking_id);
                 }

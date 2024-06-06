@@ -434,6 +434,16 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                         <div class="col-sm-3">
                         </div>
                         <div class="col-sm-9">
+
+                            <?php if(isset($this->is_nestpay_enabled) && $this->is_nestpay_enabled == true) {  
+
+                                 echo l(" To confirm the booking, we kindly request you to complete the payment process on the next page.<br> Please note that this is a  pre-authorization or post-authorization payment base on the policy of that room type, and if it's pre-authorization this amount will be charged upon check-in.<br>");
+                                    ?>
+
+                                 <!-- <b><span style="color:red;"> <?php //echo l("You can not create a Booking for more then 21 days.");?></span></b> -->
+
+                             <?php } else { ?>
+                                
                             <?php echo l("By clicking 'Book Now' below, I agree with the"); ?> <?php echo $company_data['name']; ?> <?php echo l("'s Reservation Policy and"); ?>
                             <?php  if(empty($whitelabelinfo) || (isset($whitelabelinfo['name']) && $whitelabelinfo['name'] == 'Minical')) {  ?>
                                 <a href="#" data-toggle="modal" data-target="#policy_modal">
@@ -449,7 +459,9 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                                 <a <?php echo !empty($whitelabelinfo['privacy_policy']) ? 'target="_blank" href="'.$whitelabelinfo['privacy_policy'].'"' : 'href="#"' ?>>
                                     <?php echo l("Privacy Policy"); ?><br/>
                                 </a>
-                            <?php } ?>
+                           <?php } 
+
+                             } ?>
 
 
                         </div>
