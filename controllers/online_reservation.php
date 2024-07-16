@@ -1634,8 +1634,24 @@ class Online_reservation extends MY_Controller
         }
     }
 
-    function reservation_success () {
+    // function reservation_success () {
+    //     $data = $this->session->all_userdata();
+    //     $data['main_content'] = '../extensions/'.$this->module_name.'/views/reservation_success';
+    //     $this->template->load('online_reservation_template', null , $data['main_content'], $data);
+    //     // $this->load->view('includes/online_reservation_template', $data);
+    // }
+
+    function reservation_success ($company_id = null) {
         $data = $this->session->all_userdata();
+
+        if($company_id){
+            $company_data = $this->Company_model->get_company($company_id);
+        }
+
+        if($company_data && count($company_data) > 0){
+            $data['company_data'] = $company_data;
+        }
+
         $data['main_content'] = '../extensions/'.$this->module_name.'/views/reservation_success';
         $this->template->load('online_reservation_template', null , $data['main_content'], $data);
         // $this->load->view('includes/online_reservation_template', $data);
