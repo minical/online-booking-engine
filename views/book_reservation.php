@@ -435,9 +435,9 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                         </div>
                         <div class="col-sm-9">
 
-                            <?php if(isset($this->is_nestpay_enabled) && $this->is_nestpay_enabled == true) {  
+                            <?php if(($this->is_nestpay_enabled == 1) || ($this->is_nestpaymkd_enabled == 1)) {  
 
-                                 echo l(" To confirm the booking, we kindly request you to complete the payment process on the next page.<br> Please note that this is a  pre-authorization or post-authorization payment base on the policy of that room type, and if it's pre-authorization this amount will be charged upon check-in.<br>");
+                                 //echo l(" To confirm the booking, we kindly request you to complete the payment process on the next page.<br> Please note that this is a  pre-authorization or post-authorization payment base on the policy of that room type, and if it's pre-authorization this amount will be charged upon check-in.<br>");
                                     ?>
 
                                  <!-- <b><span style="color:red;"> <?php //echo l("You can not create a Booking for more then 21 days.");?></span></b> -->
