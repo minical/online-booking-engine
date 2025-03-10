@@ -1085,7 +1085,8 @@ class Online_reservation extends MY_Controller
         endif;
 
       
-        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] !== 'nexio' and $gateway_settings['selected_payment_gateway'] !== 'pcibooking' and $gateway_settings['selected_payment_gateway'] !== 'kovena' and $gateway_settings['selected_payment_gateway'] !== 'cardknox'and $gateway_settings['selected_payment_gateway'] !=='nestpay'and $gateway_settings['selected_payment_gateway'] !=='nestpaymkd'){
+        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] !== 'nexio' and $gateway_settings['selected_payment_gateway'] !== 'pcibooking' and $gateway_settings['selected_payment_gateway'] !== 'kovena' and $gateway_settings['selected_payment_gateway'] !== 'cardknox'and $gateway_settings['selected_payment_gateway'] !=='nestpay'
+            and $gateway_settings['selected_payment_gateway'] !=='nestpaymkd' and $gateway_settings['selected_payment_gateway'] !=='nestpayalb' and $gateway_settings['selected_payment_gateway'] !=='nestpaysrb'){
             $this->form_validation->set_rules(
                 'cc_number',
                 'CC number',
@@ -1624,6 +1625,14 @@ class Online_reservation extends MY_Controller
                     $this->Booking_model->delete_booking($booking_id);
                     
                     redirect('/public/get_nestpaymkd_post_bookingengine/'.$company_id.'/'.$booking_id);
+                }elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] == 'nestpayalb'){
+
+                    $this->Booking_model->delete_booking($booking_id);
+                    redirect('/public/get_nestpayalb_post_bookingengine/'.$company_id.'/'.$booking_id);
+                }elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] == 'nestpaysrb'){
+                    
+                    $this->Booking_model->delete_booking($booking_id);
+                    redirect('/public/get_nestpaysrb_post_bookingengine/'.$company_id.'/'.$booking_id);
                 }
                 else{
 
