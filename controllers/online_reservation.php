@@ -1085,8 +1085,18 @@ class Online_reservation extends MY_Controller
         endif;
 
       
-        if ($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] !== 'nexio' and $gateway_settings['selected_payment_gateway'] !== 'pcibooking' and $gateway_settings['selected_payment_gateway'] !== 'kovena' and $gateway_settings['selected_payment_gateway'] !== 'cardknox'and $gateway_settings['selected_payment_gateway'] !=='nestpay'
-            and $gateway_settings['selected_payment_gateway'] !=='nestpaymkd' and $gateway_settings['selected_payment_gateway'] !=='nestpayalb' and $gateway_settings['selected_payment_gateway'] !=='nestpaysrb'){
+        if (
+            $data['store_cc_in_booking_engine'] && 
+            $data['are_gateway_credentials_filled'] && 
+            $gateway_settings['selected_payment_gateway'] !== 'nexio' && 
+            $gateway_settings['selected_payment_gateway'] !== 'pcibooking' && 
+            $gateway_settings['selected_payment_gateway'] !== 'kovena' && 
+            $gateway_settings['selected_payment_gateway'] !== 'cardknox' && 
+            $gateway_settings['selected_payment_gateway'] !== 'nestpay' &&
+            $gateway_settings['selected_payment_gateway'] !== 'nestpaymkd' && 
+            $gateway_settings['selected_payment_gateway'] !== 'nestpayalb' && 
+            $gateway_settings['selected_payment_gateway'] !== 'nestpaysrb' && 
+            $gateway_settings['selected_payment_gateway'] !== 'square'){
             $this->form_validation->set_rules(
                 'cc_number',
                 'CC number',
@@ -1598,6 +1608,61 @@ class Online_reservation extends MY_Controller
 
                     $customer_card__data = $this->Card_model->update_customer_primary_card($customer_id, $data);
                     $session_data = $this->session->all_userdata();
+
+                    // prx($session_data); die;
+
+                    $res = array(
+                        "url" => 'online_reservation/reservation_success/'.$this->uri->segment(3),
+                        "session_data" => $session_data
+                    );
+                    // prx($res); die;
+                    echo json_encode($res);
+                    // redirect('/online_reservation/reservation_success/'.$this->uri->segment(3)); 
+                     
+                }
+
+
+
+
+
+
+
+
+
+
+                elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $this->is_square_enabled == true){
+
+                    $customer_card__data = $this->input->post();
+                    // prx($customer_card__data);
+
+                    // echo "customer_data = ";prx($customer_card__data);echo " = customer_datasss"; die;
+
+                    $this->load->library('../extensions/square-payment-integration/libraries/ProcessPayment');
+                    $create_customer = $this->processpayment->crateSquareCustomer($customer_card__data['customer_data']);
+                    // prx($create_customer);
+                    if(
+                        isset($create_customer['success']) &&
+                        $create_customer['success'] &&
+                        isset($create_customer['square_card_id']) &&
+                        $create_customer['square_card_id']
+                    ) {
+
+                        $customer_card__data['meta_data']['token'] = $create_customer['square_card_id'];
+                        $customer_card__data['meta_data']['square_customer_id'] = $create_customer['square_customer_id'];
+                        $customer_card__data['meta_data']['source'] = "square";
+                        
+                        $data = [];
+                        $data['cc_number'] = $customer_card__data['customer_data']['cc_number'];
+                        $data['cc_expiry_month'] = $customer_card__data['customer_data']['cc_expiry_month'];
+                        $data['cc_expiry_year'] = $customer_card__data['customer_data']['cc_expiry_year'];
+
+                        $data['customer_meta_data'] = json_encode($customer_card__data['meta_data']);
+
+                        $this->load->model('Card_model');
+
+                        $customer_card__data = $this->Card_model->update_customer_primary_card($customer_id, $data);
+                        $session_data = $this->session->all_userdata();
+                    }
 
                     // prx($session_data); die;
 

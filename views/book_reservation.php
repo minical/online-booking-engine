@@ -364,6 +364,14 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
 						<div class="col-sm-9 add_card_details"></div>
                     <?php elseif ($store_cc_in_booking_engine and $are_gateway_credentials_filled and $view_data['gateway_settings']['selected_payment_gateway'] == 'cardknox' and  $this->is_cardknox_enabled ) : ?>
                         <div class="col-sm-9 add_cardknox_details"></div>
+                    
+                    <?php elseif ($store_cc_in_booking_engine and $are_gateway_credentials_filled and $view_data['gateway_settings']['selected_payment_gateway'] == 'square' and  $this->is_square_enabled ) : ?>
+                        <div class="col-sm-9 add_square_details"></div>
+                        
+                        <?php $gateway_meta_data = json_decode($company_data['gateway_meta_data'], true); ?>
+                        <input type="hidden" name="gateway_square_app_id" id="gateway_square_app_id" value="<?php echo $gateway_meta_data['app_id']; ?>">
+                        <input type="hidden" name="gateway_square_location_id" id="gateway_square_location_id" value="<?php echo $gateway_meta_data['location_id']; ?>">
+                    
                     <?php elseif ($store_cc_in_booking_engine and $are_gateway_credentials_filled): ?>
                         
                         <div class="form-group cc_details">
@@ -475,14 +483,19 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                         $store_cc_in_booking_engine and 
                         $are_gateway_credentials_filled and 
                         (
-                            ($view_data['gateway_settings']['selected_payment_gateway'] == 'pcibooking')
+                            (
+                                $view_data['gateway_settings']['selected_payment_gateway'] == 'pcibooking'
+                            )
                              || $view_data['gateway_settings']['selected_payment_gateway'] == 'kovena'
-                             || $view_data['gateway_settings']['selected_payment_gateway'] == 'cardknox')
+                             || $view_data['gateway_settings']['selected_payment_gateway'] == 'cardknox'
+                             || $view_data['gateway_settings']['selected_payment_gateway'] == 'square')
 
                              and (
                                 ( isset($this->is_pcibooking_enabled) && $this->is_pcibooking_enabled)
                                  || ( isset($this->is_kovena_enabled) && $this->is_kovena_enabled)
-                                 || ( isset($this->is_cardknox_enabled) && $this->is_cardknox_enabled) )
+                                 || ( isset($this->is_cardknox_enabled) && $this->is_cardknox_enabled) 
+                                 || ( isset($this->is_square_enabled) && $this->is_square_enabled) 
+                             )
                               
                          ){  ?>
 						<input type="button" value="<?php echo l('Book Now', 1); ?>" class="btn btn-success btn-lg pull-right book_now" />
