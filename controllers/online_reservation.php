@@ -1096,7 +1096,8 @@ class Online_reservation extends MY_Controller
             $gateway_settings['selected_payment_gateway'] !== 'nestpaymkd' && 
             $gateway_settings['selected_payment_gateway'] !== 'nestpayalb' && 
             $gateway_settings['selected_payment_gateway'] !== 'nestpaysrb' && 
-            $gateway_settings['selected_payment_gateway'] !== 'square'){
+            $gateway_settings['selected_payment_gateway'] !== 'square'
+            &&  $gateway_settings['selected_payment_gateway'] !=='helixpay'){
             $this->form_validation->set_rules(
                 'cc_number',
                 'CC number',
@@ -1698,6 +1699,9 @@ class Online_reservation extends MY_Controller
                     
                     $this->Booking_model->delete_booking($booking_id);
                     redirect('/public/get_nestpaysrb_post_bookingengine/'.$company_id.'/'.$booking_id);
+                }elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] == 'helixpay'){
+                    $this->Booking_model->delete_booking($booking_id);
+                    redirect('/public/get_helixpay_post_bookingengine/'.$company_id.'/'.$booking_id);
                 }
                 else{
 
