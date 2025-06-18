@@ -387,6 +387,12 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                         <?php $gateway_meta_data = json_decode($company_data['gateway_meta_data'], true); ?>
                         <input type="hidden" name="gateway_square_app_id" id="gateway_square_app_id" value="<?php echo $gateway_meta_data['app_id']; ?>">
                         <input type="hidden" name="gateway_square_location_id" id="gateway_square_location_id" value="<?php echo $gateway_meta_data['location_id']; ?>">
+
+                    <?php elseif ($store_cc_in_booking_engine and $are_gateway_credentials_filled and $view_data['gateway_settings']['selected_payment_gateway'] == 'stripe' and  $this->is_stripe_enabled ) : ?>
+                        <div class="col-sm-9 add_stripe_details"></div>
+                        
+                        <?php $stripe_publishable_key = $company_data['stripe_publishable_key']; ?>
+                        <input type="hidden" name="stripe_public_key" id="stripe_public_key" value="<?php echo $stripe_publishable_key; ?>">
                     
                     <?php elseif ($store_cc_in_booking_engine and $are_gateway_credentials_filled): ?>
                         
@@ -504,13 +510,15 @@ $partner_name =  isset($whitelabelinfo['name']) ? ucfirst($whitelabelinfo['name'
                             )
                              || $view_data['gateway_settings']['selected_payment_gateway'] == 'kovena'
                              || $view_data['gateway_settings']['selected_payment_gateway'] == 'cardknox'
+                             || $view_data['gateway_settings']['selected_payment_gateway'] == 'stripe'
                              || $view_data['gateway_settings']['selected_payment_gateway'] == 'square')
 
                              and (
-                                ( isset($this->is_pcibooking_enabled) && $this->is_pcibooking_enabled)
+                                    ( isset($this->is_pcibooking_enabled) && $this->is_pcibooking_enabled)
                                  || ( isset($this->is_kovena_enabled) && $this->is_kovena_enabled)
                                  || ( isset($this->is_cardknox_enabled) && $this->is_cardknox_enabled) 
                                  || ( isset($this->is_square_enabled) && $this->is_square_enabled) 
+                                 || ( isset($this->is_stripe_enabled) && $this->is_stripe_enabled) 
                              )
                               
                          ){  ?>

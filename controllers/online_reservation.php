@@ -1096,8 +1096,9 @@ class Online_reservation extends MY_Controller
             $gateway_settings['selected_payment_gateway'] !== 'nestpaymkd' && 
             $gateway_settings['selected_payment_gateway'] !== 'nestpayalb' && 
             $gateway_settings['selected_payment_gateway'] !== 'nestpaysrb' && 
-            $gateway_settings['selected_payment_gateway'] !== 'square'
-            &&  $gateway_settings['selected_payment_gateway'] !=='helixpay'){
+            $gateway_settings['selected_payment_gateway'] !== 'square' && 
+            $gateway_settings['selected_payment_gateway'] !== 'helixpay' && 
+            $gateway_settings['selected_payment_gateway'] !== 'stripe'){
             $this->form_validation->set_rules(
                 'cc_number',
                 'CC number',
@@ -1676,6 +1677,50 @@ class Online_reservation extends MY_Controller
                     // redirect('/online_reservation/reservation_success/'.$this->uri->segment(3)); 
                      
                 }
+
+                elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $this->is_stripe_enabled == true){
+
+                    $customer_card__data = $this->input->post();
+                    // prx($customer_card__data);
+
+                    // echo "customer_data = ";prx($customer_card__data);echo " = customer_datasss"; die;
+
+                    // $this->load->library('../extensions/stripe-integration/libraries/ProcessPayment');
+                    // $create_customer = $this->processpayment->crateSquareCustomer($customer_card__data['customer_data']);
+                    // prx($create_customer);
+                    if(
+                        isset($customer_card__data['customer_data']['stripe_token']) &&
+                        $customer_card__data['customer_data']['stripe_token']
+                    ) {
+
+                        $customer_card__data['meta_data']['token'] = $customer_card__data['customer_data']['stripe_token'];
+                        $customer_card__data['meta_data']['source'] = "stripe";
+                        
+                        $data = [];
+                        $data['cc_number'] = $customer_card__data['customer_data']['cc_number'];
+                        $data['cc_expiry_month'] = $customer_card__data['customer_data']['cc_expiry_month'];
+                        $data['cc_expiry_year'] = $customer_card__data['customer_data']['cc_expiry_year'];
+
+                        $data['customer_meta_data'] = json_encode($customer_card__data['meta_data']);
+
+                        $this->load->model('Card_model');
+
+                        $customer_card__data = $this->Card_model->update_customer_primary_card($customer_id, $data);
+                        $session_data = $this->session->all_userdata();
+                    }
+
+                    // prx($session_data); die;
+
+                    $res = array(
+                        "url" => 'online_reservation/reservation_success/'.$this->uri->segment(3),
+                        "session_data" => $session_data
+                    );
+                    // prx($res); die;
+                    echo json_encode($res);
+                    // redirect('/online_reservation/reservation_success/'.$this->uri->segment(3)); 
+                     
+                }
+
                 elseif($data['store_cc_in_booking_engine'] and $data['are_gateway_credentials_filled'] and $gateway_settings['selected_payment_gateway'] == 'kovena'){
                     $res = array(
                         "url" => 'online_reservation/reservation_success/'.$this->uri->segment(3)
