@@ -240,7 +240,9 @@
                                     </div>
                                 </div>
                                 <div class="col-md-12" style="min-height: 55px;">
-                                    <?php echo $rate_plan['description'] ? str_replace(PHP_EOL, '<br/>', $rate_plan['description']) : ''; ?>
+                                    <?php $content = $rate_plan['description'];
+                                        $content = preg_replace('/(<br\s*\/?>\s*){2,}/i', '<br>', $content); ?>
+                                    <?php echo $content ? $content : null; ?>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="text-left">
