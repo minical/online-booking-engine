@@ -593,7 +593,7 @@ innGrid.toggleSaveTranslationBtn = function() {
 /*** Hotel calendar START ***/
 var hoteldatepicker = null; // global
 
-innGrid.initializeHotelCalendar = function(soldOutDisabledDates) {
+innGrid.initializeHotelCalendar = function(soldOutDisabledDates, allowSameDayCheckins) {
 
     var onSelectRange = function() {
         console.log('Date range selected!');
@@ -604,25 +604,31 @@ innGrid.initializeHotelCalendar = function(soldOutDisabledDates) {
 
 
     var input = document.getElementById('hotel-calendar-date-range');
+
+    // calculate startDate
+    var today = new Date();
+    var startDate = allowSameDayCheckins ? today : new Date(today.setDate(today.getDate() + 1));
+
     var options = {
         animationSpeed: '0s',
         autoClose: false,
         enableCheckout: true,
         disabledDates: soldOutDisabledDates,
         onSelectRange: onSelectRange,
-        moveBothMonths: true
+        moveBothMonths: true,
+        startDate: startDate  // key line added
     };
     hoteldatepicker = new HotelDatepicker(input, options);
     hoteldatepicker.open();
-
-
 
 };
 
 $(document).ready(function(evt) {
     if (typeof HotelDatepicker !== "undefined") {
         fetchRoomTypeAvailability(evt, function() { hoteldatepicker.reRenderCalendar(evt); }, 'previous');
-        innGrid.initializeHotelCalendar();
+        // innGrid.initializeHotelCalendar();
+        console.log('allowSameDayCheckins',allowSameDayCheckins);
+        innGrid.initializeHotelCalendar([], allowSameDayCheckins);
     }
 
     $('body').on('click', '.check_availability', function() {

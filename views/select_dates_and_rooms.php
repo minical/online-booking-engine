@@ -108,3 +108,6 @@
 <input type="hidden" name="selling_date" value="<?php echo $selling_date; ?>" />
 <input type="hidden" name="subscription_level" value="<?php echo $company_data['subscription_level']; ?>" />
 
+<script>
+    var allowSameDayCheckins = <?php echo $company_data['allow_same_day_check_in'] ? 'true' : 'false'; ?>;
+</script>
