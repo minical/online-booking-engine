@@ -166,7 +166,7 @@
 
             </div> 
         </div>
-		<!--<div class="form-group">
+		<div class="form-group">
 			<label for="website_uri" class="col-sm-4 control-label">
 				<?php echo l('take_payment_using_paypal'); ?>
 				<p class="help-block h6"></p>
@@ -182,8 +182,8 @@
 				</select>
 
 			</div>
-		</div> -->
-		<!-- <div class="form-group">
+		</div>
+		<div class="form-group">
 			<label for="website_uri" class="col-sm-4 control-label">
 				<?php echo l('paypal_account_email'); ?>: 
 			</label>
@@ -219,7 +219,7 @@
 					
 				</div>	
 			</div>
-		</div> -->
+		</div>
         
         <div class="form-group">
 			<label for="mark-reservation" class="col-sm-4 control-label">
