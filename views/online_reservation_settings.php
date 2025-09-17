@@ -74,6 +74,7 @@
         	<h3 class="panel-title"><?php echo l('Online booking engine fields'); ?>:</h3>
       	</div>
       	<div class="panel-body">
+			  <div class="table-responsive">
         	<table id="booking-engine-fields" class="table">
 				<tr>
 					<th><?php echo l('Field name', true); ?></th>
@@ -124,6 +125,7 @@
 				<h3><?php echo l('No booking field have been found.', true); ?></h3>
 				<?php endif; ?>
 			</table>
+			</div>
 			<br />
 			<button id="save-all-booking-fields-button" class="btn btn-primary"><?php echo l('save_all'); ?></button>
   		</div>
