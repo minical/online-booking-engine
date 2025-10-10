@@ -326,20 +326,8 @@ class Online_reservation extends MY_Controller
 
             $data['view_data']['unavailable_room_types']    = $unavailable_room_types;
 
-
-            if (isset($_GET['dev_mode'])) {
-                echo l('session set_userdata: <pre>',true);print_r($data);
-            }
-
             $data['view_data']['booking_source'] = $origin;
             $this->session->set_userdata($data);
-
-            if (isset($_GET['dev_mode'])) {
-
-                $session_data = $this->session->all_userdata();
-
-                echo l('Data is all set. get session all_userdata: <pre>',true);print_r($session_data);
-            }
 
             $data['company_data'] = $company_data;
 
@@ -575,19 +563,7 @@ class Online_reservation extends MY_Controller
 
         $data['view_data']['unavailable_room_types']    = $unavailable_room_types;
 
-
-        if (isset($_GET['dev_mode'])) {
-            echo l('session set_userdata: <pre>',true);print_r($data);
-        }
-
         $this->session->set_userdata($data);
-
-        if (isset($_GET['dev_mode'])) {
-
-            $session_data = $this->session->all_userdata();
-
-            echo l('Data is all set. get session all_userdata: <pre>',true);print_r($session_data);
-        }
 
         $data['company_data'] = $company_data;
 
@@ -644,10 +620,6 @@ class Online_reservation extends MY_Controller
         }
         else
         {
-            if (isset($_GET['dev_mode'])) {
-                echo l('session all_userdata: <pre>', true);print_r($session_data);die;
-            }
-
             redirect("/online_reservation/select_dates_and_rooms/".$company_id);
         }
 
