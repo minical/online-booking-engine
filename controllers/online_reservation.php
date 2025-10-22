@@ -1958,7 +1958,7 @@ class Online_reservation extends MY_Controller
                 "date_time" => gmdate('Y-m-d H:i:s'),
                 "log_type" => 24,
                 "log" => $booking_extra_id,
-                "user_id" => 2,
+                "user_id" => 0, //User_id 2 is for Hoteli.Tech
                 "selling_date" => $selling_date
             );
             $this->Booking_log_model->insert_log($log);
