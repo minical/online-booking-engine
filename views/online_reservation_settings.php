@@ -166,60 +166,61 @@
 
             </div> 
         </div>
-		<div class="form-group">
-			<label for="website_uri" class="col-sm-4 control-label">
-				<?php echo l('take_payment_using_paypal'); ?>
-				<p class="help-block h6"></p>
-			</label>
-			<div class="col-sm-8">
-				<select name="require_paypal_payment" class="form-control">
-					<option value="1" <?php echo ($company_data['require_paypal_payment'] == '1')?'SELECTED=SELECTED':''; ?> >
-						<?php echo l('Enabled', true); ?>
-					</option>
-					<option value="0" <?php echo ($company_data['require_paypal_payment'] == '0')?'SELECTED=SELECTED':''; ?> >
-						<?php echo l('Disabled', true); ?>
-					</option>
-				</select>
+		<?php if($this->company_id == 4660): // Paypal settings for EASY INN 4660 ?>
+			<div class="form-group">
+				<label for="website_uri" class="col-sm-4 control-label">
+					<?php echo l('take_payment_using_paypal'); ?>
+					<p class="help-block h6"></p>
+				</label>
+				<div class="col-sm-8">
+					<select name="require_paypal_payment" class="form-control">
+						<option value="1" <?php echo ($company_data['require_paypal_payment'] == '1')?'SELECTED=SELECTED':''; ?> >
+							<?php echo l('Enabled', true); ?>
+						</option>
+						<option value="0" <?php echo ($company_data['require_paypal_payment'] == '0')?'SELECTED=SELECTED':''; ?> >
+							<?php echo l('Disabled', true); ?>
+						</option>
+					</select>
 
+				</div>
 			</div>
-		</div>
-		<div class="form-group">
-			<label for="website_uri" class="col-sm-4 control-label">
-				<?php echo l('paypal_account_email'); ?>: 
-			</label>
-			<div class="col-sm-8">
-				<input type="text" name="paypal_account" class="form-control"
-					value="<?php echo $company_data['paypal_account']; ?>"
-					<?php if (!$company_data['require_paypal_payment'])
-						{
-							echo "readonly";
-						}
-					?>
-				/> 
-			</div>
-		</div>
-
-		<div class="form-group">
-			<label for="website_uri" class="col-sm-4 control-label">
-				<?php echo l('required_deposit'); ?>:
-				<p class="help-block h6">
-					<?php echo l('Guests must pay the deposit in order to confirm their reservations', true); ?>
-				</p>
-			</label>
-			<div class="col-sm-8">
-				<div class="input-group">
-	     			<input type="text" name="percentage_of_required_paypal_payment"  class="form-control"
-						value="<?php echo $company_data['percentage_of_required_paypal_payment']; ?>" 
+			<div class="form-group">
+				<label for="website_uri" class="col-sm-4 control-label">
+					<?php echo l('paypal_account_email'); ?>: 
+				</label>
+				<div class="col-sm-8">
+					<input type="text" name="paypal_account" class="form-control"
+						value="<?php echo $company_data['paypal_account']; ?>"
 						<?php if (!$company_data['require_paypal_payment'])
-							{	
+							{
 								echo "readonly";
 							}
 						?>
-					/><div class="input-group-addon">%</div>
-					
-				</div>	
+					/> 
+				</div>
 			</div>
-		</div>
+			<div class="form-group">
+				<label for="website_uri" class="col-sm-4 control-label">
+					<?php echo l('required_deposit'); ?>:
+					<p class="help-block h6">
+						<?php echo l('Guests must pay the deposit in order to confirm their reservations', true); ?>
+					</p>
+				</label>
+				<div class="col-sm-8">
+					<div class="input-group">
+		     			<input type="text" name="percentage_of_required_paypal_payment"  class="form-control"
+							value="<?php echo $company_data['percentage_of_required_paypal_payment']; ?>" 
+							<?php if (!$company_data['require_paypal_payment'])
+								{	
+									echo "readonly";
+								}
+							?>
+						/><div class="input-group-addon">%</div>
+						
+					</div>	
+				</div>
+			</div>
+		<?php endif; ?>
         
         <div class="form-group">
 			<label for="mark-reservation" class="col-sm-4 control-label">
