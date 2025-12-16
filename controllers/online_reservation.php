@@ -1317,6 +1317,24 @@ class Online_reservation extends MY_Controller
 
                     $this->Booking_room_history_model->create_booking_room_history($booking_history);
 
+                    // If extension is enabled, call helper
+                    if (
+                        isset($this->is_auto_service_fee_enabled) &&
+                        $this->is_auto_service_fee_enabled
+                    ) {
+
+                        $single_booking_details = $booking_data;
+                        $single_booking_details['check_in_date'] = $booking_history['check_in_date'];
+                        $single_booking_details['check_out_date'] = $booking_history['check_out_date'];
+
+                        auto_add_service_fee_on_booking_creation(
+                            $single_booking_details,
+                            $company_data,
+                            $booking_id,
+                            $company_data['selling_date'],
+                        );
+                    }
+
                      $booking_action_data = array(
                         'booking_id' => $booking_id,  
                         'company_id'=> $this->company_id,
