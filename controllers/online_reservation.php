@@ -1220,9 +1220,9 @@ class Online_reservation extends MY_Controller
                     ){
                         $card_token = $card_response['tokenization_response']["data"]["attributes"]["card_token"];
 
-                        $cvc_encrypted = get_cc_cvc_encrypted($cvc, $card_token);
+                        // $cvc_encrypted = get_cc_cvc_encrypted($cvc, $card_token);
 
-                        $card_details['cc_cvc_encrypted'] = ($cvc_encrypted) ? $cvc_encrypted : "";
+                        // $card_details['cc_cvc_encrypted'] = ($cvc_encrypted) ? $cvc_encrypted : "";
                         $card_details['cc_number'] = 'XXXX XXXX XXXX '.substr($cc_number,-4);
 
                         $meta['token'] = $card_token;
@@ -1234,7 +1234,7 @@ class Online_reservation extends MY_Controller
                 $customer_data['cc_expiry_month'] = "";
                 $customer_data['cc_expiry_year'] = "";
                 $customer_data['cc_tokenex_token'] = "";
-                $customer_data['cc_cvc_encrypted'] = "";
+                // $customer_data['cc_cvc_encrypted'] = "";
 
                 $check_data = $this->Card_model->get_customer_primary_card($customer_id);
         
